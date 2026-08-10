@@ -1,0 +1,42 @@
+Notes on DCM procedure in SPM
+-----------------------------
+
+Step 1: GLM design
+
+[Basically the setup for FLA I was doing]
+
+* New Batch: Stats > fMRI model specification
+* Directory: select the GLM folder
+* Units for design: Scans
+* Interscan interval: our TR value in seconds
+* Data & Design:
+	> Scans: choose all functional scans
+	> Conditions: using timing vectors, add these in
+	
+* Second module: Stats > model estimation
+* Select SPM.mat, click on Dependency button + proposed item
+
+Step 2: Adding contrasts
+
+* New Batch: Stats > Contrast manager
+* Select SPM.mat from previous step
+* Contrast Sessions:
+	> One F-contrast
+	> Three t-contrasts (for each condition)
+	
+Step 3: Identifying ROIs based on contrasts
+
+* View contrast in spm window
+* Launch "contrast" option, then pair with second contrast
+* Overlay > Previous Sections
+* Navigate to coordinates of interest
+* Select "eigenvariate" > label region accordingly
+
+Step 4: Building the DCM with nodes
+
+* Dynamic Causal Modeling button
+* Specify > SPM.mat file associated to previous parts
+* Give model a name
+* Select VOIs in order
+* Specify slice timing details (?)
+* define the extrinsic connections between regions

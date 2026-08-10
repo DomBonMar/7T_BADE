@@ -1,0 +1,86 @@
+{
+	"dcm2niixOptions": "-b y -ba y -z n -f '%3s_%f_%p_%t'",
+  "descriptions": [
+    {
+      "datatype": "fmap",
+      "suffix": "TB1TFL",
+      "criteria": {
+        "SeriesDescription": "*b1map*"
+      }
+    },
+    {
+      "datatype": "func",
+      "suffix": "vaso",
+      "criteria": {
+        "SeriesDescription": "*vaso_Trials?_E00_S00*"
+      },
+      "custom_entities": "task-bade"
+    },
+    {
+      "datatype": "func",
+      "suffix": "bold",
+      "criteria": {
+        "SeriesDescription": "*vaso_Trials?_E00_S01*"
+      },
+      "custom_entities": "task-bade"
+    },
+    {
+      "datatype": "anat",
+      "suffix": "T1w",
+      "criteria": {
+        "SeriesDescription": "*t1w_E00_S00*"
+      },
+      "custom_entities": "acq-epi_desc-vaso"
+    },
+    {
+      "datatype": "anat",
+      "suffix": "T1w",
+      "criteria": {
+        "SeriesDescription": "*t1w_E00_S01*"
+      },
+      "custom_entities": "acq-epi_desc-bold"
+    },
+    {
+      "datatype": "anat",
+      "suffix": "INV1",
+      "criteria": {
+        "SeriesDescription": "*INV1*"
+      },
+      "custom_entities": "acq-mp2rage"
+    },
+    {
+      "datatype": "anat",
+      "suffix": "INV2",
+      "criteria": {
+        "SeriesDescription": "*INV2*"
+      },
+      "custom_entities": "acq-mp2rage"
+    },
+    {
+      "datatype": "anat",
+      "suffix": "T1map",
+      "criteria": {
+        "SeriesDescription": "*T1_Images*"
+      },
+      "custom_entities": "acq-mp2rage"
+    },
+    {
+      "datatype": "anat",
+      "suffix": "UNIT1",
+      "criteria": {
+        "SeriesDescription": "*UNI_Images*"
+      },
+      "custom_entities": "acq-mp2rage"
+    },
+    {
+      "datatype": "anat",
+      "suffix": "T2w",
+      "criteria": {
+        "SeriesDescription": "*T2w*hippo*"
+      },
+      "custom_entities": "desc-hippo"
+    }
+    
+  ]
+}
+
