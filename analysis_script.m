@@ -89,11 +89,7 @@ end
 % Part 1: generates the timing vectors using python script
 if first_run
     cd(CODEDIR)
-    if contains(sub,'pilot')
-        cmd = sprintf('python bade-fmri_timing-vectors-PILOT.py %s', sub);
-    else
-        cmd = sprintf('python bade-fmri_timing-vectors.py %s', sub);
-    end
+    cmd = sprintf('python bade-fmri_timing-vectors.py %s', sub);
     system(cmd)
 end
 
@@ -110,7 +106,6 @@ for r = 1:N_RUNS
         idx_labels(r,c) = sprintf("%s_run%d_%s",sub,i,CONDITIONS(c));
     end
 end
-
 
 %% 1) FIRST-LEVEL ANALYSIS
 

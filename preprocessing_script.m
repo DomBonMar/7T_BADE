@@ -3,42 +3,45 @@
 
 %% 0.1) SCAN INFO AND METADATA
 
-sub = 'U104';
+sub = 'pilot02';
 first_run = false; % if first time running script
 
 N_RUNS = 3;
 RUN_TYPES = ["bold", "vaso"];
 TAGS = ["","b"];
+NOISE_VOL = 2;
 
 %% 0.2) FILE DIRECTORY SETUP
 
-% baseline directories
+% baseline directories [ONLY EDIT THESE]
 BASEDIR = '/data/lavlab/layer-7t-predictive-coding';
-DATADIR = sprintf('%s/data',BASEDIR);
+APPS = '~/Documents/APPS';
 
 % software + code
 CODEDIR = sprintf('%s/code',BASEDIR);
-addpath(CODEDIR);
-SPMDIR = '/home/cic/mardom/Documents/APPS/spm/';
-addpath(SPMDIR);
-LAYNII = '~/Documents/APPS/LayNii/';
+SPM = sprintf('%s/spm',APPS);
+LAYNII = sprintf('%s/LayNii',APPS);
+NORDIC = sprintf('%s/NORDIC',APPS);
+
+addpath(genpath(CODEDIR)); addpath(SPM); addpath(NORDIC);
 
 % raw data directories for sub
+DATADIR = sprintf('%s/data',BASEDIR);
 DICOM = sprintf('%s/mri/dicom/%s',DATADIR,sub);
 BIDS = sprintf('%s/mri/bids',DATADIR);
 SUBBIDS = sprintf('%s/sub-%s',BIDS,sub);
 
 % processed data directories for sub
-SPM = sprintf('%s/mri/spm/%s',DATADIR,sub);
-FUNCDIR = sprintf('%s/func',SPM);
-ANATDIR = sprintf('%s/anat',SPM);
-SCRIPTS = sprintf('%s/scripts',CODEDIR);
+SPMDIR = sprintf('%s/mri/spm/%s',DATADIR,sub);
+FUNCDIR = sprintf('%s/func',SPMDIR);
+ANATDIR = sprintf('%s/anat',SPMDIR);
+SCRIPTS = sprintf('%s/script-logs',BASEDIR);
 
 % creates all required directories
 if first_run
-    mkdir(SPM); % dicom given / bids created later
+    mkdir(SPMDIR); % dicom given / bids created later
     mkdir(FUNCDIR); mkdir(ANATDIR);
-    mkdir(sprintf('%s/bade-info',SPM));
+    mkdir(sprintf('%s/bade-info',SPMDIR));
 end
 
 %% 1.1) CONVERTING DICOM TO NIFTI
@@ -66,7 +69,9 @@ disp("DICOM CONVERSION COMPLETE")
 
 all_runs = {bold_runs,vaso_runs};
 
-%% 1.3) DEFACING SCANS [TO WRITE]
+% also, manually QC the functional images here
+
+%% 2.1) DEFACING SCANS
 
 % only need to do the mp2rage scans
 cmd = deface_scans(sub,SUBBIDS);
@@ -82,23 +87,33 @@ cd(BIDS)
 system(sprintf('source %s',filename))
 disp("DEFACING COMPLETE")
 
-%% 1.4) MOVING DEFACED SCANS
+%% 2.2) MOVING DEFACED SCANS
 
 % check that defacing worked first, then run this step
 
 % preserve originals too
+preserve_originals = true;
 
-system(sprintf('mv %s/anat/sub-%s_acq-mp2rage_INV1.nii %s/anat/sub-%s_acq-mp2rage_INV1_no-deface.nii',SUBBIDS,sub,SUBBIDS,sub))
-system(sprintf('mv %s/anat/sub-%s_acq-mp2rage_INV2.nii %s/anat/sub-%s_acq-mp2rage_INV2_no-deface.nii',SUBBIDS,sub,SUBBIDS,sub))
-system(sprintf('mv %s/anat/sub-%s_acq-mp2rage_UNIT1.nii %s/anat/sub-%s_acq-mp2rage_UNIT1_no-deface.nii',SUBBIDS,sub,SUBBIDS,sub))
-system(sprintf('mv %s/anat/sub-%s_acq-mp2rage_T1map.nii %s/anat/sub-%s_acq-mp2rage_T1map_no-deface.nii',SUBBIDS,sub,SUBBIDS,sub))
+if preserve_originals
+    system(sprintf('mv %s/anat/sub-%s_acq-mp2rage_INV1.nii %s/anat/sub-%s_acq-mp2rage_INV1_no-deface.nii',SUBBIDS,sub,SUBBIDS,sub))
+    system(sprintf('mv %s/anat/sub-%s_acq-mp2rage_INV2.nii %s/anat/sub-%s_acq-mp2rage_INV2_no-deface.nii',SUBBIDS,sub,SUBBIDS,sub))
+    system(sprintf('mv %s/anat/sub-%s_acq-mp2rage_UNIT1.nii %s/anat/sub-%s_acq-mp2rage_UNIT1_no-deface.nii',SUBBIDS,sub,SUBBIDS,sub))
+    system(sprintf('mv %s/anat/sub-%s_acq-mp2rage_T1map.nii %s/anat/sub-%s_acq-mp2rage_T1map_no-deface.nii',SUBBIDS,sub,SUBBIDS,sub))
+end
 
 system(sprintf('mv %s/anat/sub-%s_acq-mp2rage_INV1_defaced.nii %s/anat/sub-%s_acq-mp2rage_INV1.nii',SUBBIDS,sub,SUBBIDS,sub))
 system(sprintf('mv %s/anat/sub-%s_acq-mp2rage_INV2_defaced.nii %s/anat/sub-%s_acq-mp2rage_INV2.nii',SUBBIDS,sub,SUBBIDS,sub))
 system(sprintf('mv %s/anat/sub-%s_acq-mp2rage_UNIT1_defaced.nii %s/anat/sub-%s_acq-mp2rage_UNIT1.nii',SUBBIDS,sub,SUBBIDS,sub))
 system(sprintf('mv %s/anat/sub-%s_acq-mp2rage_T1map_defaced.nii %s/anat/sub-%s_acq-mp2rage_T1map.nii',SUBBIDS,sub,SUBBIDS,sub))
 
-%% 2) MOTION CORRECTION
+%% 3) APPLYING NORDIC DENOISING
+
+% applies denoising to the functional runs
+apply_nordic(NOISE_VOL,bold_runs,vaso_runs,sprintf('%s/func',SUBBIDS),FUNCDIR)
+
+disp("NORDIC COMPLETE")
+
+%% 4) MOTION CORRECTION
 
 % corrects bold / vaso runs separately
 for t = 1:length(RUN_TYPES)
@@ -111,7 +126,7 @@ for t = 1:length(RUN_TYPES)
         runs(r) = sprintf('%s/func/%s',SUBBIDS,runs(r));
     end
 
-    matlabbatch = motion_correction(runs,SPMDIR);
+    matlabbatch = motion_correction(runs,SPM);
 
     cd(SCRIPTS) % saves job to dir
     save(sprintf('%s_2-motion-correction-%s',sub,typ),'matlabbatch');
@@ -121,15 +136,15 @@ for t = 1:length(RUN_TYPES)
     clear matlabbatch % clear matlabbatch
 
     % moving files to SPM dir
-    system(sprintf('mv %s/func/mean* %s/func/',SUBBIDS,SPM))
-    system(sprintf('mv %s/func/r* %s/func/',SUBBIDS,SPM))
-    system(sprintf('mv %s/func/*.mat %s/func/',SUBBIDS,SPM))
+    system(sprintf('mv %s/func/mean* %s/func/',SUBBIDS,SPMDIR))
+    system(sprintf('mv %s/func/r* %s/func/',SUBBIDS,SPMDIR))
+    system(sprintf('mv %s/func/*.mat %s/func/',SUBBIDS,SPMDIR))
     
     fprintf("MOTION CORRECTION COMPLETED for %s", typ)
 
 end
 
-%% 3) CORRECT T2* DEPENDENCY
+%% 5) CORRECT T2* DEPENDENCY
 
 % this step decontaminates the vaso runs using bold signal
 % basically complicated, look at the blog posts
@@ -147,7 +162,7 @@ system(sprintf('source %s',filename))
 
 disp("BOLD CORRECTION COMPLETE")
 
-%% 4.1) PICKING BASELINE RUN
+%% 6.1) PICKING BASELINE RUN
 
 % GOAL: coregister all runs to the one with least motion
 
@@ -171,7 +186,7 @@ end
 % min_inds = [1,1]
 % sprintf('%s,%d,%d',sub,min_inds(1),min_inds(2))
 
-%% 4.2) GENERATING T1-LIKE IMAGE
+%% 6.2) GENERATING T1-LIKE IMAGE
 
 % using the lowest motion runs as a template
 target_img = strings(1,2);
@@ -195,7 +210,7 @@ system(sprintf('source %s',filename))
 
 disp("T1-LIKE IMAGE GENERATED")
 
-%% 4.3) COREGISTRATION
+%% 7.1) COREGISTRATION
 
 % coregister vaso and bold runs separately
 % also coregister the t1-like image to each
@@ -219,7 +234,7 @@ for t = 1:length(RUN_TYPES)
     end
 
     % prepares batch
-    matlabbatch = coregistration(runs,mean_img,{t1like},mean_img(min_ind),SPMDIR);
+    matlabbatch = coregistration(runs,mean_img,{t1like},mean_img(min_ind),SPM);
 
     cd(SCRIPTS)
     save(sprintf('%s_4-coregistration-%s',sub,typ),'matlabbatch');
@@ -232,7 +247,7 @@ for t = 1:length(RUN_TYPES)
 
 end
 
-%% 4.4) ALIGNMENT CORRECTION
+%% 7.2) ALIGNMENT CORRECTION
 
 % run this part to align all scans properly
 
