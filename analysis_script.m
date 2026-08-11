@@ -61,29 +61,6 @@ end
 all_runs = eval(sprintf('%s_runs',RUN_TYPE));
 N_RUNS = length(all_runs);
 
-% retrieve min run index
-MOTION_INFO = readtable(sprintf('%s/mri/spm/least-motion.txt',DATADIR));
-[N, ~] = size(MOTION_INFO);
-
-min_ind = -1; subrow = -1;
-for i = 1:N
-    if strcmp(MOTION_INFO.subject(i),sub)
-        fprintf("Subject is at row %d",i)
-    end
-    subrow = i;
-    break
-end
-
-% retrieves target index
-if strcmp(RUN_TYPE,'bold')
-    min_ind = MOTION_INFO.bold(subrow);
-% VASO RUNS
-elseif strcmp(RUN_TYPE,'vaso')
-    min_ind = MOTION_INFO.vaso(subrow);
-else
-     disp("IMPOSSIBLE INDEX")
-end
-
 %% 0.4) LOAD TIMING VECTORS
 
 % Part 1: generates the timing vectors using python script
@@ -98,7 +75,7 @@ timing_file = sprintf("%s/bade-info/%s_bade-fmri_timing_vectors.mat",SPM,sub);
 timings = load(timing_file);
 
 % Part 3: creates index labels
-% use data.{SUB}_run{X}_{condition} to index the timing vectors
+% use timings.{SUB}_run{X}_{condition} to index the timing vectors
 
 idx_labels = strings(N_RUNS,length(CONDITIONS));
 for r = 1:N_RUNS

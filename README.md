@@ -315,82 +315,40 @@ In this step, we conduct a first analysis of the functional data as observed acr
 Info you need:
 
 TR >> Scan repetition time (in seconds)
+CONTRAST LABELS >> name of the contrasts
+CONTRAST VECTORS >> array specifying the contrast values
 
-## 10. Draw ROI
+## 2.0: Extracting timing vectors
 
-### fsleyes
+### python
 
-- Open fsleyes and the T1-like or processed T1-weighted image.
-- Open drawing tools.
-- Create a new image on top of the loaded image to draw on.
-    1) Grey-CSF border
-    2) Grey-White matter
-    3) Closes boundaries
-- Fill it out with the bucket.
-- Save as rim.
-- Only need to do 1-3 slices (as many as you can to see nice contrast).
+First, we start by determining whenever each of our three conditions are occuring with respect to the scan start time. This process is performed by the **bade-fmri_timing-vectors.py** script, creating a matlab structure that contains the start times of every condition trial.
 
-## 11. Generate layers
+To index a specific subject/run/condition array, use:
 
-### laynii
+ ``timings.{subject}_run{run_ID}_{condition_label}``
 
-Use the **LN2_LAYERS** command to generate the layers from the mask file.
+## 2.1: First-level analysis
 
-Command structure:
+The procedure below describes the manual approach to performing the FLA in spm.
 
-```bash
-LN2_LAYERS -rim <ROI-mask.nii> -nr_layers 10 -incl_borders
-```
+### spm
 
-**Output**:
-
-1) <ROI-mask_**layers**_equidist.nii> is the target file to be used in the layer profiling step.
-
-2) <ROI-mask_**metric**_equidist.nii> is a smoothed file used to estimate layers, to be discarded.
-
-3) <ROI-mask_**midGM**_equidist.nii> is a file outlining the midpoint of GM, also to be discarded.
-
-## 12. Extract layer profiles
-
-### laynii
-
-Use ln_profile2 command:
-
-```bash
-./LN2_PROFILE -input ../../../research/layer-7t-predictive-coding/pilot/pilot01/nifti/meanabold_rest_pilot01_rslh_ep3d_vaso_fullbrain_0.8x0.8x0.9_E00_M_7.nii -layers ../../../research/layer-7t-predictive-coding/pilot/pilot01/nifti/T1_rest/T1_rest_thresh_mask_layers.nii.gz -plot -output ../../../research/layer-7t-predictive-coding/pilot/pilot01/nifti/T1_rest/layer-profile-bold.txt
-```
-
-## 13. First-level analysis
-
-### Prepare Timing Vectors
-
-Use the script at ``layer-7t-predictive-coding/code/timing_vectors_mat.py``
-
-This will generate the timing details of the BADE task and convert them into MATLAB arrays that can be used in SPM.
-
-Then, load the timing vectors in MATLAB by running ``layer-7t-predictive-coding/code/load_timing_vectors.m``
-
-This will create a structure **data** that contains all the timing vectors.
-
-To index a specific subject/run/condition array, use ``data.{subject}_run{run_ID}_{condition_label}``
-
-### SPM analysis
-
-**13.1. Launch spm**
+**1. Launch spm**
 
 In the matlab terminal, type ```spm fmri```
 
-**13.2. First-Level**
+**2. First-Level**
 
 On the main spm window, click the option **Specify 1st Level**
 
-**13.3. Creating Directory**
+**3. Creating Directory**
 
 First, create a directory to store outputs: ``mkdir first_level_analysis``
 
 Then, navigate to **Directory** and select the created directory above.
 
-**13.4. Timing Parameters**
+**4. Timing Parameters**
 
 Navigate to **Timing Parameters** and then specify the following:
 
@@ -400,7 +358,7 @@ For **Interscan interval**, select your correspnding TR value.
 
 Leave the remaining fields at their default values.
 
-**13.5. Functional Images**
+**5. Functional Images**
 
 Navigate to **Data and Design**. For each individual run, select **New Subject/Session**.
 
@@ -420,35 +378,37 @@ For each condition:
 
 Then, in **Multiple regressors**, add the text file with motion correction parameters (rp**.txt file) corresponding to the run in question.
 
-**13.6. Analysis Parameters**
+**6. Analysis Parameters**
 
 Navigate to **Basis Functions >> Canonical HRF** and select **Model derivatives >> Time derivatives**.
 
 Leave the rest of the parameters at their defaults.
 
-**13.7. Outputs**
+**7. Outputs**
 
 An **SPM.mat** file will be produced in the specified folder.
 
-## 14. Model Estimation
+## 2.2: Model estimation
 
-**14.1. Launch spm**
+After specifying the model in the last step, we now need to estimate and fit the model.
+
+**1. Launch spm**
 
 In the matlab terminal, type ```spm fmri```
 
-**14.2. Estimate Mode**
+**2. Estimate Mode**
 
 On the main spm window, click the option **Estimate**
 
-**14.3. Analysis File**
+**3. Analysis File**
 
 Navigate to **Select SPM.mat** and select the **SPM.mat** file created in the first-level analysis.
 
-**14.4 Options**
+**4 Options**
 
 Leave **Write Residuals** as **No** and leave **Method** as **Classical**. Then, save the batch and run the analysis.
 
-**14.5 Outputs**
+**5 Outputs**
 
 All outputs get saved in the same folder containing the SPM.mat file.
 
@@ -460,17 +420,19 @@ All outputs get saved in the same folder containing the SPM.mat file.
 
 >> **RPV.nii** are the resels of the voxels (smoothness of estimate)
 
-## 15 Inference
+## 2.3: Contrast analysis
 
-**15.1. Launch spm**
+Finally, we need to use our model to compute the GLM for each of our contrasts of interest.
+
+**1. Launch spm**
 
 In the matlab terminal, type ```spm fmri```
 
-**15.2. Results Mode**
+**2. Results Mode**
 
 On the main spm window, click the option **Results**. This will launch the contrast manager window.
 
-**15.3. Defining Contrasts**
+**3. Defining Contrasts**
 
 To define a new contrast, select the **t contrast** option, then click **Define New Contrast** at the bottom.
 
@@ -478,24 +440,79 @@ Give the contrast a name.
 
 Input the contrast vector (weights of the betas), and hit **Ok**.
 
-Pilot 01 vectprs:
-
-Disconfirm - Confirm = [-1 0 1 0 0 0   0 0 0 0 0 0 0]
-
-Disconfirm - Baseline = [0 0 1 0 -1 0   0 0 0 0 0 0 0]
-
-Confirm - Baseline = [1 0 0 0 -1 0   0 0 0 0 0 0 0]
-
-Pilot 02 vectors:
-
-Disconfirm - Confirm = [-1 0 1 0 0 0   0 0 0 0 0 0   -1 0 1 0 0 0   0 0 0 0 0 0   -1 0 1 0 0 0  0 0 0 0 0 0  0 0 0]
-
-Disconfirm - Baseline = [0 0 1 0 -1 0   0 0 0 0 0 0   0 0 1 0 -1 0   0 0 0 0 0 0   0 0 1 0 -1 0  0 0 0 0 0 0  0 0 0]
-
-Confirm - Baseline = [1 0 0 0 -1 0   0 0 0 0 0 0   1 0 0 0 -1 0   0 0 0 0 0 0   1 0 0 0 -1 0  0 0 0 0 0 0  0 0 0]
-
-**15.4. Running Analysis**
+**4. Running Analysis**
 
 When you hit **Done** after finalizing the contrast, you need to answer questions.
 
-(fill question details)
+**5. Outputs**
+
+[TO FILL]
+
+# 3 - LAYER EXTRACTION
+
+In this step, we will extract layered dynamics from our functional maps. The procedures involved include outlining our regions of interest, growing the layers, and profiling functional activation patterns within the ROIs.
+
+## 3.1: Drawing ROIs
+
+### fsleyes
+
+- Open fsleyes and the T1-like or processed T1-weighted image.
+- Open drawing tools.
+- Create a new image on top of the loaded image to draw on.
+    1) Grey-CSF border
+    2) Grey-White matter
+    3) Closes boundaries
+- Fill it out with the bucket.
+- Save as rim.
+- Only need to do 1-3 slices (as many as you can to see nice contrast).
+
+## 3.2: Growing layers
+
+### laynii
+
+Use the **LN2_LAYERS** command to generate the layers from each of the mask files.
+
+Command structure:
+
+```bash
+LN2_LAYERS -rim <ROI-mask.nii> -nr_layers 10 -incl_borders
+```
+
+**Output**:
+
+1) <ROI-mask_**layers**_equidist.nii> is the target file to be used in the layer profiling step.
+
+2) <ROI-mask_**metric**_equidist.nii> is a smoothed file used to estimate layers, to be discarded.
+
+3) <ROI-mask_**midGM**_equidist.nii> is a file outlining the midpoint of GM, also to be discarded.
+
+## 3.3 Profiling layers
+
+### laynii
+
+Use the **LN2_PROFILE** command to profile activation patterns across the mask layers. This procedure is repeated for every contrast / mask combination.
+
+Command structure:
+
+```bash
+LN2_PROFILE -input <spmT_000X.nii> -layers <ROI-mask_layers_equidist.nii> -plot -output <ROI-profile-cX.txt>
+```
+
+**Output**: One ROI-profile-cX.txt file per combination will be produced for a given ROI and contrast (X) pairing that contains the following details.
+
+>> Column 1: Layer number. (1 = closests to WM border and 10 = closest to CSF border)
+
+>> Column 2: Mean activation value in this layer.
+
+>> Column 3: Standard error of the layer activation.
+
+>> Column 4: Number of voxels in this layer.
+
+# 4 - SECOND-LEVEL ANALYSIS
+
+[COMING SOON]
+
+# 5 - DYNAMIC CAUSAL MODELING
+
+
+

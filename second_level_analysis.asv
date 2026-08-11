@@ -55,16 +55,11 @@ for r = 1:length(ROIS)
         % plot each subject separately
         for s = 1:length(SUBS)
 
-            plot(1:NUM_LAYERS,data(s,:),'Color','blue','LineStyle','--','Marker','+')
-            hold on
+            plot(1:NUM_LAYERS,data(s,:),'Color','blue','LineStyle','--')
 
         end
 
         % plot median among all subjects
-        plot(1:NUM_LAYERS,mean(data),'Color','black','Marker','o')
-        title(sprintf('%s in %s',CONTRASTS{c},ROIS{r}))
-
-        % FIX PLOT SCALES TO HAVE THEM ALL EQUAL
 
     end
 end
