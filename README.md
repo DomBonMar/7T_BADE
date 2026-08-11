@@ -310,7 +310,11 @@ Finally, re-align the VASO and BOLD runs to their respective target mean image. 
 
 # 2 - FIRST-LEVEL ANALYSIS
 
+In this step, we conduct a first analysis of the functional data as observed across our task conditions of interest (confirm, disconfirm, baseline).
 
+Info you need:
+
+TR >> Scan repetition time (in seconds)
 
 ## 10. Draw ROI
 
@@ -330,25 +334,21 @@ Finally, re-align the VASO and BOLD runs to their respective target mean image. 
 
 ### laynii
 
-Use ln2_grow_layers to generate the layers from the mask file. Outputs a layered version of the mask.
+Use the **LN2_LAYERS** command to generate the layers from the mask file.
 
 Command structure:
 
 ```bash
-./LN_GROW_LAYERS -rim <mask_file.rim.nii.gz> -N <num layers>
+LN2_LAYERS -rim <ROI-mask.nii> -nr_layers 10 -incl_borders
 ```
 
-Katie's Example:
+**Output**:
 
-```bash
-./LN_GROW_LAYERS -rim ../../../research/layer-7t-predictive-coding/pilot/pilot01/nifti/T1_rest/T1_rest_thresh_mask.nii.gz -N 10
-```
+1) <ROI-mask_**layers**_equidist.nii> is the target file to be used in the layer profiling step.
 
-Tests I ran:
+2) <ROI-mask_**metric**_equidist.nii> is a smoothed file used to estimate layers, to be discarded.
 
-```bash
-~/Documents/APPS/LayNii/LN_GROW_LAYERS -rim pilot02_anat-T1w_acq-mp2rage_05mm_UP_UNI_Images_10_mask_VC2.nii.gz -N 10
-```
+3) <ROI-mask_**midGM**_equidist.nii> is a file outlining the midpoint of GM, also to be discarded.
 
 ## 12. Extract layer profiles
 

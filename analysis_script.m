@@ -3,7 +3,7 @@
 
 %% 0.1) SCAN INFO AND METADATA
 
-sub = 'U102';
+sub = 'U104';
 first_run = false;
 
 % finding repetition time (nifti metadata)
@@ -41,10 +41,10 @@ SPMDIR = '/home/cic/mardom/Documents/APPS/spm';
 CODEDIR = sprintf('%s/code',BASEDIR);
 SCRIPTS = sprintf('%s/scripts',CODEDIR);
 addpath(SPMDIR);
-addpath(CODEDIR);
+addpath(genpath(CODEDIR));
 
 % analysis directories
-OUTDIR = sprintf('%s/unpublished-results/',BASEDIR);
+OUTDIR = sprintf('%s/unpublished-results',BASEDIR);
 FLADIR = sprintf('%s/first-level-analysis/sub-%s/%s',OUTDIR,sub,RUN_TYPE);
 MASKDIR = sprintf('%s/layer-masks/sub-%s/%s',OUTDIR,sub,RUN_TYPE);
 
