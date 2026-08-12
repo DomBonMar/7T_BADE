@@ -3,13 +3,32 @@
 
 %% 0.1) SCAN INFO AND METADATA
 
-sub = 'U103';
+sub = 'pilot02';
 first_run = true; % if first time running script
 
 N_RUNS = 3;
 RUN_TYPES = ["bold", "vaso"];
-TAGS = ["","b"];
-NOISE_VOL = 2;
+NOISE_VOL = 0;
+
+% expected mp2rage outputs
+anat_files = {'acq-mp2rage_INV1',...
+    'acq-mp2rage_INV2',...
+    'acq-mp2rage_UNIT1',...
+    'acq-mp2rage_T1map'};
+preserve_originals = true; % defacing step
+
+% PREFIXES USED AT EACH STEP
+step_nord = 'n';
+step_moco = 'r';
+step_boco = 'b';
+step_corg = 'c';
+
+PREFIX_NORD = [step_nord, '_'];
+PREFIX_MOCO = [step_moco,PREFIX_NORD];
+PREFIX_BOCO = {PREFIX_MOCO,...
+    [step_boco,PREFIX_MOCO]}; % 1 -> bold, 2 -> vaso
+PREFIX_CORG = {[step_corg,PREFIX_BOCO{1}],...
+    [step_corg,PREFIX_BOCO{2}]};
 
 %% 0.2) FILE DIRECTORY SETUP
 
@@ -50,13 +69,7 @@ cmd = convert_dicom(sub,DICOM,CODEDIR,BIDS); % retrieves dcm2bids command
 
 % saves command to text file
 filename = sprintf('%s/%s_1-convert-dicom.sh',SCRIPTS,sub);
-fid = fopen(filename,'w');
-fprintf(fid,'%s',cmd);
-fclose(fid);
-
-% running the process
-cd(BIDS)
-system(sprintf('source %s',filename))
+save_and_run(filename,cmd,BIDS)
 
 disp("DICOM CONVERSION COMPLETE")
 
@@ -74,42 +87,36 @@ all_runs = {bold_runs,vaso_runs};
 %% 2.1) DEFACING SCANS
 
 % only need to do the mp2rage scans
-cmd = deface_scans(sub,SUBBIDS);
+cmd = deface_scans(anat_files,SUBBIDS);
 
 % saves command to text file
 filename = sprintf('%s/%s_1-deface.sh',SCRIPTS,sub);
-fid = fopen(filename,'w');
-fprintf(fid,'%s',cmd);
-fclose(fid);
+save_and_run(filename,cmd,BIDS)
 
-% running the process
-cd(BIDS)
-system(sprintf('source %s',filename))
 disp("DEFACING COMPLETE")
 
 %% 2.2) MOVING DEFACED SCANS
 
 % check that defacing worked first, then run this step
 
-% preserve originals too
-preserve_originals = true;
+for i = 1:length(anat_files)
 
-if preserve_originals
-    system(sprintf('mv %s/anat/sub-%s_acq-mp2rage_INV1.nii %s/anat/sub-%s_acq-mp2rage_INV1_no-deface.nii',SUBBIDS,sub,SUBBIDS,sub))
-    system(sprintf('mv %s/anat/sub-%s_acq-mp2rage_INV2.nii %s/anat/sub-%s_acq-mp2rage_INV2_no-deface.nii',SUBBIDS,sub,SUBBIDS,sub))
-    system(sprintf('mv %s/anat/sub-%s_acq-mp2rage_UNIT1.nii %s/anat/sub-%s_acq-mp2rage_UNIT1_no-deface.nii',SUBBIDS,sub,SUBBIDS,sub))
-    system(sprintf('mv %s/anat/sub-%s_acq-mp2rage_T1map.nii %s/anat/sub-%s_acq-mp2rage_T1map_no-deface.nii',SUBBIDS,sub,SUBBIDS,sub))
+    % if preseve >> saves copy of original
+    if preserve_originals
+        system(sprintf('mv %s/anat/sub-%s_%s.nii %s/anat/sub-%s_%s_no-deface.nii',...
+            SUBBIDS,sub,anat_files{i},SUBBIDS,sub,anat_files{i}))
+    end
+
+    % renames defaced file to preserve name
+    system(sprintf('mv %s/anat/sub-%s_%s_defaced.nii %s/anat/sub-%s_%s.nii',...
+        SUBBIDS,sub,anat_files{i},SUBBIDS,sub,anat_files{i}));
+
 end
-
-system(sprintf('mv %s/anat/sub-%s_acq-mp2rage_INV1_defaced.nii %s/anat/sub-%s_acq-mp2rage_INV1.nii',SUBBIDS,sub,SUBBIDS,sub))
-system(sprintf('mv %s/anat/sub-%s_acq-mp2rage_INV2_defaced.nii %s/anat/sub-%s_acq-mp2rage_INV2.nii',SUBBIDS,sub,SUBBIDS,sub))
-system(sprintf('mv %s/anat/sub-%s_acq-mp2rage_UNIT1_defaced.nii %s/anat/sub-%s_acq-mp2rage_UNIT1.nii',SUBBIDS,sub,SUBBIDS,sub))
-system(sprintf('mv %s/anat/sub-%s_acq-mp2rage_T1map_defaced.nii %s/anat/sub-%s_acq-mp2rage_T1map.nii',SUBBIDS,sub,SUBBIDS,sub))
 
 %% 3) APPLYING NORDIC DENOISING
 
 % applies denoising to the functional runs
-apply_nordic(NOISE_VOL,bold_runs,vaso_runs,sprintf('%s/func',SUBBIDS),FUNCDIR)
+apply_nordic(NOISE_VOL,bold_runs,vaso_runs,sprintf('%s/func',SUBBIDS),FUNCDIR,step_nord)
 
 disp("NORDIC COMPLETE")
 
@@ -123,10 +130,10 @@ for t = 1:length(RUN_TYPES)
     % locating functional scans
     runs = all_runs{t};
     for r = 1:length(runs)
-        runs(r) = sprintf('%s/func/%s',SUBBIDS,runs(r));
+        runs(r) = sprintf('%s/func/%s%s',SUBBIDS,PREFIX_NORD,runs(r));
     end
 
-    matlabbatch = motion_correction(runs,SPM);
+    matlabbatch = motion_correction(runs,SPM,step_moco);
 
     cd(SCRIPTS) % saves job to dir
     save(sprintf('%s_2-motion-correction-%s',sub,typ),'matlabbatch');
@@ -137,7 +144,7 @@ for t = 1:length(RUN_TYPES)
 
     % moving files to SPM dir
     system(sprintf('mv %s/func/mean* %s/func/',SUBBIDS,SPMDIR))
-    system(sprintf('mv %s/func/r* %s/func/',SUBBIDS,SPMDIR))
+    system(sprintf('mv %s/func/%s* %s/func/',SUBBIDS,PREFIX_MOCO,SPMDIR))
     system(sprintf('mv %s/func/*.mat %s/func/',SUBBIDS,SPMDIR))
     
     fprintf("MOTION CORRECTION COMPLETED for %s", typ)
@@ -149,16 +156,35 @@ end
 % this step decontaminates the vaso runs using bold signal
 % basically complicated, look at the blog posts
 
-cmd = bold_correction(bold_runs,vaso_runs,FUNCDIR);
+% Step 1: boco for functional runs
+disp("Running BOCO for functional runs")
+pbold = strings(1,N_RUNS); pvaso = strings(1,N_RUNS);
+
+for r = 1:N_RUNS
+    pbold(r) = sprintf('%s%s',PREFIX_MOCO,bold_runs(r));
+    pvaso(r) = sprintf('%s%s',PREFIX_MOCO,vaso_runs(r));
+end
+
+cmd = bold_correction(pbold,pvaso,FUNCDIR,step_boco);
 
 % saves commands to text file
-filename = sprintf('%s/%s_3-bold-correction.sh',SCRIPTS,sub);
-fid = fopen(filename,'w');
-fprintf(fid,'%s',cmd);
-fclose(fid);
+filename = sprintf('%s/%s_3-bold-correction-func.sh',SCRIPTS,sub);
+save_and_run(filename,cmd,FUNCDIR)
 
-cd(FUNCDIR)
-system(sprintf('source %s',filename))
+% Step 2: repeating for mean files
+disp("Running BOCO for mean images")
+mbold = strings(1,N_RUNS); mvaso = strings(1,N_RUNS);
+
+for r = 1:N_RUNS
+    mbold(r) = sprintf('mean%s%s',PREFIX_NORD,bold_runs(r)); % DO WE NEED NORD PREFIX?
+    mvaso(r) = sprintf('mean%s%s',PREFIX_NORD,vaso_runs(r));
+end
+
+cmd = bold_correction(mbold,mvaso,FUNCDIR,step_boco);
+
+% saves commands to text file
+filename = sprintf('%s/%s_3-bold-correction-mean.sh',SCRIPTS,sub);
+save_and_run(filename,cmd,FUNCDIR)
 
 disp("BOLD CORRECTION COMPLETE")
 
@@ -173,7 +199,7 @@ for t = 1:length(RUN_TYPES)
     for r = 1:N_RUNS
 
         [~,filename,~] = fileparts(all_runs{t}(r));
-        filename = sprintf('%s/rp_%s.txt',FUNCDIR,filename);
+        filename = sprintf('%s/rp_%s%s.txt',FUNCDIR,PREFIX_NORD,filename);
         moco_info = load(filename);
         
         subplot(length(RUN_TYPES),N_RUNS,r+N_RUNS*(t-1))
@@ -201,12 +227,7 @@ cmd = generate_t1_like(target_img(1),target_img(2),t1_name,ANATDIR);
 
 % saves commands to text file
 filename = sprintf('%s/%s_4-gen-t1-like.sh',SCRIPTS,sub);
-fid = fopen(filename,'w');
-fprintf(fid,'%s',cmd);
-fclose(fid);
-
-cd(ANATDIR)
-system(sprintf('source %s',filename))
+save_and_run(filename,cmd,ANATDIR)
 
 disp("T1-LIKE IMAGE GENERATED")
 
@@ -219,7 +240,12 @@ for t = 1:length(RUN_TYPES)
 
     typ = RUN_TYPES(t);
     min_ind = min_inds(t);
-    tag = TAGS(t);
+    prefix = PREFIX_BOCO{t};
+    if strcmp(typ,'bold')
+        tag = '';
+    else
+        tag = step_boco;
+    end
 
     % makes a copy of t1-like for coreg
     t1like = sprintf('%s/sub-%s_t1-like-%s.nii',ANATDIR,sub,typ);
@@ -230,7 +256,7 @@ for t = 1:length(RUN_TYPES)
     runs = all_runs{t}; % offset for vaso runs
     for r = 1:length(runs)
         mean_img(r) = sprintf('%s/%smean%s',FUNCDIR,tag,runs(r));
-        runs(r) = sprintf('%s/%sr_%s',FUNCDIR,tag,runs(r));
+        runs(r) = sprintf('%s/%s%s',FUNCDIR,prefix,runs(r));
     end
 
     % prepares batch
@@ -256,11 +282,11 @@ for t = 1:length(RUN_TYPES)
     typ = RUN_TYPES(t);
     runs = all_runs{t};
     min_ind = min_inds(t);
-    tag = TAGS(t);
+    prefix = STEP_CORG{t};
 
     fprintf('Aligning %s images\n',typ)
 
-    M = spm_get_space(sprintf('%s/c%sr_%s',FUNCDIR,tag,runs(min_ind))); % target alignment
+    M = spm_get_space(sprintf('%s/%s%s',FUNCDIR,prefix,runs(min_ind))); % target alignment
 
     % functional alignment
     for r = 1:length(runs)
@@ -270,9 +296,9 @@ for t = 1:length(RUN_TYPES)
         end
         % shift alignment to match target
         fprintf('Aligning %s run %d\n',typ,r)
-        V = spm_vol(sprintf('%s/c%sr_%s',FUNCDIR,tag,runs(r))); 
+        V = spm_vol(sprintf('%s/%s%s',FUNCDIR,prefix,runs(r))); 
         for n = 1:numel(V)
-            spm_get_space(sprintf('%s/c%sr_%s,%d',FUNCDIR,tag,runs(r),n), M);   
+            spm_get_space(sprintf('%s/%s%s,%d',FUNCDIR,prefix,runs(r),n), M);   
         end
     end
 

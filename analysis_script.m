@@ -3,8 +3,8 @@
 
 %% 0.1) SCAN INFO AND METADATA
 
-sub = 'U104';
-first_run = false;
+sub = 'U103';
+first_run = true;
 
 % finding repetition time (nifti metadata)
 TR = 8.140; % in seconds
@@ -80,7 +80,7 @@ timings = load(timing_file);
 idx_labels = strings(N_RUNS,length(CONDITIONS));
 for r = 1:N_RUNS
     for c = 1:length(CONDITIONS)
-        idx_labels(r,c) = sprintf("%s_run%d_%s",sub,i,CONDITIONS(c));
+        idx_labels(r,c) = sprintf("%s_run%d_%s",sub,r,CONDITIONS(c));
     end
 end
 

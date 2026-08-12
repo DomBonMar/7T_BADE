@@ -1,4 +1,4 @@
-function apply_nordic(noise_volumes,bold_runs,vaso_runs,INDIR,OUTDIR)
+function apply_nordic(noise_volumes,bold_runs,vaso_runs,INDIR,OUTDIR,PREFIX)
 
 % code inspired by https://github.com/LasseKnudsen1/NORDIC-VASO
 % mirrors structure of NORDIC-VASO_wrapper.m
@@ -6,16 +6,13 @@ function apply_nordic(noise_volumes,bold_runs,vaso_runs,INDIR,OUTDIR)
 
 % noise_volumes: number of appended noise-volumes at the end of each timeseries 
 
-PREFIX = "n_";
-
 % ARG structure following VASO wrapper
+ARG = struct;
+ARG.NORDIC = 1;
 ARG.magnitude_only = 1;
-ARG.temporal_phase=1;
-ARG.phase_filter_width=10;
-ARG.gfactor_patch_overlap=6;
-ARG.save_gfactor_map=1;
-ARG.save_add_info=1;
-ARG.save_residual_matlab=1;
+ARG.save_gfactor_map=0;
+ARG.save_add_info=0;
+ARG.save_residual_matlab=0;
 ARG.factor_error=1;
 ARG.noise_volume_last=noise_volumes;
 ARG.DIROUT=OUTDIR;

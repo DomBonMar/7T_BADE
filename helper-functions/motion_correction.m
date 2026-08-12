@@ -1,4 +1,4 @@
-function matlabbatch = motion_correction(runs,SPMDIR)
+function matlabbatch = motion_correction(runs,SPMDIR,PREFIX)
 
 % generates motion correction batch using SPM
 
@@ -20,7 +20,7 @@ for i = 1:length(runs)
     matlabbatch{i}.spm.spatial.realign.estwrite.roptions.interp = 4;
     matlabbatch{i}.spm.spatial.realign.estwrite.roptions.wrap = [0 0 0];
     matlabbatch{i}.spm.spatial.realign.estwrite.roptions.mask = 1;
-    matlabbatch{i}.spm.spatial.realign.estwrite.roptions.prefix = 'r_';
+    matlabbatch{i}.spm.spatial.realign.estwrite.roptions.prefix = PREFIX;
 
 end
     
