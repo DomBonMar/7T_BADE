@@ -3,8 +3,8 @@
 
 %% 0.1) SCAN INFO AND METADATA
 
-sub = 'pilot02';
-first_run = true; % if first time running script
+sub = 'U202';
+first_run = false; % if first time running script
 
 N_RUNS = 3;
 RUN_TYPES = ["bold", "vaso"];
@@ -18,7 +18,7 @@ anat_files = {'acq-mp2rage_INV1',...
 preserve_originals = true; % defacing step
 
 % PREFIXES USED AT EACH STEP
-step_nord = 'n';
+step_nord = ''; % empty for now
 step_moco = 'r';
 step_boco = 'b';
 step_corg = 'c';
@@ -130,10 +130,13 @@ for t = 1:length(RUN_TYPES)
     % locating functional scans
     runs = all_runs{t};
     for r = 1:length(runs)
-        runs(r) = sprintf('%s/func/%s%s',SUBBIDS,PREFIX_NORD,runs(r));
+        %runs(r) = sprintf('%s/func/%s%s',SUBBIDS,PREFIX_NORD,runs(r));
+        %REVERT ONCE NORDIC FIXED
+        runs(r) = sprintf('%s/func/%s',SUBBIDS,runs(r));
     end
 
-    matlabbatch = motion_correction(runs,SPM,step_moco);
+    %matlabbatch = motion_correction(runs,SPM,step_moco); SAME THING
+    matlabbatch = motion_correction(runs,SPM,PREFIX_MOCO);
 
     cd(SCRIPTS) % saves job to dir
     save(sprintf('%s_2-motion-correction-%s',sub,typ),'matlabbatch');
@@ -144,6 +147,7 @@ for t = 1:length(RUN_TYPES)
 
     % moving files to SPM dir
     system(sprintf('mv %s/func/mean* %s/func/',SUBBIDS,SPMDIR))
+    system(sprintf('mv %s/func/rp_* %s/func/',SUBBIDS,SPMDIR))
     system(sprintf('mv %s/func/%s* %s/func/',SUBBIDS,PREFIX_MOCO,SPMDIR))
     system(sprintf('mv %s/func/*.mat %s/func/',SUBBIDS,SPMDIR))
     
@@ -176,8 +180,8 @@ disp("Running BOCO for mean images")
 mbold = strings(1,N_RUNS); mvaso = strings(1,N_RUNS);
 
 for r = 1:N_RUNS
-    mbold(r) = sprintf('mean%s%s',PREFIX_NORD,bold_runs(r)); % DO WE NEED NORD PREFIX?
-    mvaso(r) = sprintf('mean%s%s',PREFIX_NORD,vaso_runs(r));
+    mbold(r) = sprintf('mean%s',bold_runs(r)); % DO WE NEED NORD PREFIX?
+    mvaso(r) = sprintf('mean%s',vaso_runs(r));
 end
 
 cmd = bold_correction(mbold,mvaso,FUNCDIR,step_boco);
@@ -199,7 +203,7 @@ for t = 1:length(RUN_TYPES)
     for r = 1:N_RUNS
 
         [~,filename,~] = fileparts(all_runs{t}(r));
-        filename = sprintf('%s/rp_%s%s.txt',FUNCDIR,PREFIX_NORD,filename);
+        filename = sprintf('%s/rp_%s.txt',FUNCDIR,filename); % PREFIX NORD
         moco_info = load(filename);
         
         subplot(length(RUN_TYPES),N_RUNS,r+N_RUNS*(t-1))
@@ -282,7 +286,7 @@ for t = 1:length(RUN_TYPES)
     typ = RUN_TYPES(t);
     runs = all_runs{t};
     min_ind = min_inds(t);
-    prefix = STEP_CORG{t};
+    prefix = PREFIX_CORG{t};
 
     fprintf('Aligning %s images\n',typ)
 

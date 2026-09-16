@@ -4,7 +4,7 @@
 %% 0.1) SCAN INFO AND METADATA
 
 sub = 'U202';
-first_run = false;
+first_run = true;
 
 % finding repetition time (nifti metadata)
 TR = 4.472; % in seconds

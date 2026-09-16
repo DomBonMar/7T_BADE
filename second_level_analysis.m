@@ -2,7 +2,8 @@
 % grouping data from all subjects
 
 % metadata
-SUBS = {'U101','U102','U104'};
+%SUBS = {'pilot02','pilot03','U101','U102','U103','U104'};
+SUBS = {'U101','U102','U103','U104'};
 CONTRASTS = {'Confirm - Baseline', 'Disconfirm - Baseline', 'Disconfirm - Confirm'};
 ROIS = {'VC','ACC'};
 NUM_LAYERS = 10;
@@ -46,25 +47,31 @@ end
 
 %% 1.2: PLOTTING ACTIVATION PATTERNS
 
+ROI_LIMITS = [2,1];
+
 for r = 1:length(ROIS)
     for c = 1:length(CONTRASTS)
 
-        data = squeeze(MEANS(:,r,c,:)); % subs x activation matrix
+        tmp_means = squeeze(MEANS(:,r,c,:)); % subs x activation matrix
+        tmp_sds = squeeze(SDS(:,r,c,:)); % subs x activation matrix
         subplot(length(ROIS),length(CONTRASTS),length(CONTRASTS)*(r-1)+c)
 
         % plot each subject separately
         for s = 1:length(SUBS)
 
-            plot(1:NUM_LAYERS,data(s,:),'Color','blue','LineStyle','--','Marker','+')
+            %errorbar(1:NUM_LAYERS, tmp_means(s,:), tmp_sds(s,:),'Color','blue','LineStyle','--','Marker','+')
+            plot(1:NUM_LAYERS,tmp_means(s,:),'Color','blue','LineStyle','--','Marker','+')
             hold on
 
         end
 
         % plot median among all subjects
-        plot(1:NUM_LAYERS,mean(data),'Color','black','Marker','o')
+        % ADD ERROR BARS TO THE MEAN
+        plot(1:NUM_LAYERS,mean(tmp_means),'Color','black','Marker','o')
         title(sprintf('%s in %s',CONTRASTS{c},ROIS{r}))
 
-        % FIX PLOT SCALES TO HAVE THEM ALL EQUAL
+        % FIX PLOT SCALES TO HAVE THEM ALL EQUAL [make this better for future]
+        ylim([-1,ROI_LIMITS(r)])
 
     end
 end

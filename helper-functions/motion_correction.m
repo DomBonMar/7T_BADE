@@ -8,7 +8,7 @@ addpath(SPMDIR);
 
 for i = 1:length(runs)
 
-    matlabbatch{i}.spm.spatial.realign.estwrite.data = {{runs(i)}};
+    matlabbatch{i}.spm.spatial.realign.estwrite.data = {cellstr(runs(i))};
     matlabbatch{i}.spm.spatial.realign.estwrite.eoptions.quality = 0.95;
     matlabbatch{i}.spm.spatial.realign.estwrite.eoptions.sep = 1.5;
     matlabbatch{i}.spm.spatial.realign.estwrite.eoptions.fwhm = 1;
