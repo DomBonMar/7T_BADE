@@ -35,8 +35,12 @@ source ${BASEDIR}/dcm2bids_env/bin/activate
 
 # 1) CONVERTING DICOM INTO NIFTI
 
-echo "Convert dicom to nifti for ${sub}"
-dcm2bids -d "${DICOMDIR}/sub-${sub}" -p ${sub} -c "${BASEDIR}/bids-config.json" -o ${BIDSDIR}
+if [ ! -d ${DICOMDIR}/sub-${sub} ]; then
+	echo "Convert dicom to nifti for ${sub}"
+	dcm2bids -d "${DICOMDIR}/sub-${sub}" -p ${sub} -c "${BASEDIR}/bids-config.json" -o ${BIDSDIR}
+else
+	echo "BIDS conversion already completed for ${sub}"
+fi
 
 # identifying target scans
 cd "${SUBBIDS}/func"
@@ -50,19 +54,28 @@ echo "Bold scans are $bold"
 anat_tags=("UNIT1" "T1map" "INV1" "INV2")
 
 cd "${SUBBIDS}/anat"
-for tag in "${anat_tags[@]}"; do
-	echo "Defacing $tag scan for $sub"
-	scan=$(find -name "*${tag}.nii" -printf "%P\n")
-	pydeface $scan
 
-	echo "Renaming defaced scan"
-	mv $scan "original-${scan}"
-	nodeface=$(find -name "*defaced.nii" -printf "%P\n")
-	mv $nodeface $scan
-done
+orig=$(find -name "original*.nii" -printf "%P\n")
+if [ ${#orig[@]} -gt 0 ]; then
+
+	echo "Defacing already completed for $sub"
+
+else
+
+	for tag in "${anat_tags[@]}"; do
+		echo "Defacing $tag scan for $sub"
+		scan=$(find -name "*${tag}.nii" -printf "%P\n")
+		pydeface $scan
+
+		echo "Renaming defaced scan"
+		mv $scan "original-${scan}"
+		nodeface=$(find -name "*defaced.nii" -printf "%P\n")
+		mv $nodeface $scan
+	done
+fi
 
 # 3) NORDIC DENOISING
 
 echo "Applying NORDIC denoising to $sub"
-matlab -batch "addpath('${CODEDIR}'); PROC_nordic_denoising('0', '${bold}', '${vaso}', '${SUBBIDS}', '${PROCDIR}', '', 'nord'); exit"
+matlab -batch "addpath('${CODEDIR}'); [bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); PROC_nordic_denoising('0', bold, vaso, '${SUBBIDS}', '${PROCDIR}', '', 'nord'); exit"
 
