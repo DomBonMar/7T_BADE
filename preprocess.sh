@@ -77,5 +77,5 @@ fi
 # 3) NORDIC DENOISING
 
 echo "Applying NORDIC denoising to $sub\n"
-matlab -batch "addpath('${CODEDIR}'); addpath(genpath('${APPDIR}')); [bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); PROC_nordic_denoising('0', bold, vaso, '${SUBBIDS}', '${PROCDIR}', '', 'nord'); exit"
+matlab -batch "addpath('${CODEDIR}'); addpath(genpath('${APPDIR}')); [bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); PROC_nordic_denoising('0', bold, vaso, '${SUBBIDS}/func', '${PROCDIR}', '', 'nord'); exit"
 
