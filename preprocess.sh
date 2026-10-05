@@ -40,8 +40,8 @@ dcm2bids -d "${DICOMDIR}/sub-${sub}" -p ${sub} -c "${BASEDIR}/bids-config.json" 
 
 # identifying target scans
 cd "${SUBBIDS}/func"
-vaso=$(ls "*vaso*.nii")
-bold=$(ls "*bold*.nii")
+vaso=$(find -name "*vaso.nii")
+bold=$(find -name "*bold.nii")
 echo "Vaso scans are $vaso"
 echo "Bold scans are $bold"
 
@@ -52,12 +52,12 @@ anat_tags=("UNIT1" "T1map" "INV1" "INV2")
 cd "${SUBBIDS}/anat"
 for tag in "${anat_tags[@]}"; do
 	echo "Defacing $tag scan for $sub"
-	scan=$(ls "*${tag}.nii")
+	scan=$(find -name "*${tag}.nii")
 	pydeface $scan
 
 	echo "Renaming defaced scan"
 	mv $scan "original-${scan}"
-	nodeface=$(ls "*defaced.nii")
+	nodeface=$(find -name "*defaced.nii")
 	mv $nodeface $scan
 done
 
