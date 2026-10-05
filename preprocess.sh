@@ -20,7 +20,7 @@ config_file="${BASEDIR}/bids-config.json"
 # getting subject info
 mapfile -t subs < $participant_file
 sub=${subs[$SLURM_ARRAY_TASK_ID]}
-echo "Processing sub $sub"
+echo "Processing sub $sub\n"
 
 export SUBBIDS="${BIDSDIR}/sub-${sub}"
 export PROCDIR="${DATADIR}/processed/sub-${sub}"
@@ -36,18 +36,18 @@ source ${BASEDIR}/dcm2bids_env/bin/activate
 # 1) CONVERTING DICOM INTO NIFTI
 
 if [ ! -d ${DICOMDIR}/sub-${sub} ]; then
-	echo "Convert dicom to nifti for ${sub}"
+	echo "Convert dicom to nifti for ${sub}\n"
 	dcm2bids -d "${DICOMDIR}/sub-${sub}" -p ${sub} -c "${BASEDIR}/bids-config.json" -o ${BIDSDIR}
 else
-	echo "BIDS conversion already completed for ${sub}"
+	echo "BIDS conversion already completed for ${sub}\n"
 fi
 
 # identifying target scans
 cd "${SUBBIDS}/func"
 vaso=$(find -name "*vaso.nii" -printf "%P\n")
 bold=$(find -name "*bold.nii" -printf "%P\n")
-echo "Vaso scans are $vaso"
-echo "Bold scans are $bold"
+echo "Vaso scans are $vaso\n"
+echo "Bold scans are $bold\n"
 
 # 2) DEFACING SCANS
 
@@ -58,16 +58,16 @@ cd "${SUBBIDS}/anat"
 orig=$(find -name "original*.nii" -printf "%P\n")
 if [ ${#orig[@]} -gt 0 ]; then
 
-	echo "Defacing already completed for $sub"
+	echo "Defacing already completed for $sub\n"
 
 else
 
 	for tag in "${anat_tags[@]}"; do
-		echo "Defacing $tag scan for $sub"
+		echo "Defacing $tag scan for $sub\n"
 		scan=$(find -name "*${tag}.nii" -printf "%P\n")
 		pydeface $scan
 
-		echo "Renaming defaced scan"
+		echo "Renaming defaced scan\n"
 		mv $scan "original-${scan}"
 		nodeface=$(find -name "*defaced.nii" -printf "%P\n")
 		mv $nodeface $scan
@@ -76,6 +76,6 @@ fi
 
 # 3) NORDIC DENOISING
 
-echo "Applying NORDIC denoising to $sub"
-matlab -batch "addpath('${CODEDIR}'); [bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); PROC_nordic_denoising('0', bold, vaso, '${SUBBIDS}', '${PROCDIR}', '', 'nord'); exit"
+echo "Applying NORDIC denoising to $sub\n"
+matlab -batch "addpath('${CODEDIR}'); addpath(genpath('${APPDIR}')); [bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); PROC_nordic_denoising('0', bold, vaso, '${SUBBIDS}', '${PROCDIR}', '', 'nord'); exit"
 

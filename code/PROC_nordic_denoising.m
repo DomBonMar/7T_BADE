@@ -20,6 +20,9 @@ disp(PREFIX)
 bold_runs = split(bold_runs, " ");
 vaso_runs = split(vaso_runs, " ");
 
+disp(bold_runs)
+disp(vaso_runs)
+
 % ARG structure following VASO wrapper
 ARG = struct;
 ARG.NORDIC = 1;
