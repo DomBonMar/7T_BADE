@@ -30,14 +30,14 @@ for r = 1:length(bold_runs)
     fprintf("Applying nordic to bold run %d\n",r)
 
     % bold runs
-    NIFTI_NORDIC(sprintf('%s/%s%s',INDIR,INFIX,bold_runs(r)), "", ...
-                 sprintf('%s%s',PREFIX,bold_runs(r)), ARG);
+%    NIFTI_NORDIC(sprintf('%s/%s%s',INDIR,INFIX,bold_runs(r)), "", ...
+ %                sprintf('%s%s',PREFIX,bold_runs(r)), ARG);
     
     fprintf("Applying nordic to vaso run %d\n",r)
 
     % vaso runs
-    NIFTI_NORDIC(sprintf('%s/%s%s',INDIR,INFIX,vaso_runs(r)), "", ...
-                 sprintf('%s%s',PREFIX,vaso_runs(r)), ARG);
+%    NIFTI_NORDIC(sprintf('%s/%s%s',INDIR,INFIX,vaso_runs(r)), "", ...
+ %                sprintf('%s%s',PREFIX,vaso_runs(r)), ARG);
 
 end
 

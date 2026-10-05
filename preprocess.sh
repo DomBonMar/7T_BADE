@@ -3,8 +3,10 @@
 #SBATCH --output=logs/%x_%j.out
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=16
-#SBATCH --time=1:00:00
+#SBATCH --time=0:10:00
 #SBATCH --mem-per-cpu=10000
+
+$BASEDIR=$(pwd)
 
 # directory list
 export DATADIR="${BASEDIR}/data"
@@ -31,7 +33,7 @@ source ${BASEDIR}/dcm2bids_env/bin/activate
 # 1) CONVERTING DICOM INTO NIFTI
 
 echo "Convert dicom to nifti for ${sub}"
-dcm2bids -d "${DICOMDIR}/sub-${sub}" -p ${sub} -c "${CODEDIR}/bids-config.json" -o ${BIDSDIR}
+#dcm2bids -d "${DICOMDIR}/sub-${sub}" -p ${sub} -c "${CODEDIR}/bids-config.json" -o ${BIDSDIR}
 
 # identifying target scans
 cd "${SUBBIDS}/func"
@@ -47,11 +49,11 @@ anat_tags=("UNIT1" "T1map" "INV1" "INV2")
 for tag in "${anat_tags[@]}"; do
 	echo "Defacing $tag scan for $sub"
 	scan=$(ls "${SUBBIDS}/anat/*${tag}.nii")
-	pydeface $scan
+	#pydeface $scan
 done
 
 # 3) NORDIC DENOISING
 
 echo "Applying NORDIC denoising to $sub"
-matlab -batch "PROC_nordic_denoising('0', '${bold[@]}', '${vaso[@]}', '${SUBBIDS}', '${PROCDIR}', '', 'nord')"
+matlab -batch "addpath('${CODEDIR}'); PROC_nordic_denoising('0', '${bold[@]}', '${vaso[@]}', '${SUBBIDS}', '${PROCDIR}', '', 'nord'); exit"
 
