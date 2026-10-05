@@ -8,6 +8,7 @@ import numpy as np
 import sys
 from scipy import io
 from pathlib import Path
+import json
 
 # scan metadata
 SUB = sys.argv[1]
@@ -56,14 +57,18 @@ for run in range(1,N_RUNS+1):
         timings = get_timing_vector(run_trials,cond,run_onset)
         # saves output to file   
         line = f"{SUB}_run{run}_{cond}"
-        OUTDICT[line] = timings
+        OUTDICT[line] = timings.tolist()
 
     # saves baseline fixation between trials (at end of each block)
     timings = np.array(run_trials['fix.started']) - run_onset
     timings = timings[N_TRIALS_PER_BLOCK-1::N_TRIALS_PER_BLOCK]
     line = f"{SUB}_run{run}_baseline"
-    OUTDICT[line] = timings
+    OUTDICT[line] = timings.tolist()
 
 # saves directly in matlab format
 OUTFILE = f"{SPMDIR}/{SUB}/bade-info/{SUB}_bade-fmri_timing_vectors.mat"
 io.savemat(OUTFILE,OUTDICT)
+
+# saving json file too
+with open(f"{SPMDIR}/{SUB}/bade-info/{SUB}_bade-fmri_timing-vectors.json", "w") as f:
+    json.dump(OUTDICT, f)

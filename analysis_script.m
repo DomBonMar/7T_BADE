@@ -3,8 +3,8 @@
 
 %% 0.1) SCAN INFO AND METADATA
 
-sub = 'U202';
-first_run = false;
+sub = 'U106';
+first_run = true;
 
 % finding repetition time (nifti metadata)
 TR = 4.472; % in seconds
@@ -122,16 +122,19 @@ disp("MODEL ESTIMATION COMPLETE")
 CmB = [1 0 0 0 -1 0 0 0 0 0 0 0 1 0 0 0 -1 0 0 0 0 0 0 0 1 0 0 0 -1 0 0 0 0 0 0 0 0 0 0];
 DmB = [0 0 1 0 -1 0 0 0 0 0 0 0 0 0 1 0 -1 0 0 0 0 0 0 0 0 0 1 0 -1 0 0 0 0 0 0 0 0 0 0];
 DmC = [-1 0 1 0 0 0 0 0 0 0 0 0 -1 0 1 0 0 0 0 0 0 0 0 0 -1 0 1 0 0 0 0 0 0 0 0 0 0 0 0];
+CDmB = [1 0 1 0 -1 0 0 0 0 0 0 0 1 0 1 0 -1 0 0 0 0 0 0 0 1 0 1 0 -1 0 0 0 0 0 0 0 0 0 0];
 
 % if vaso --> invert contrast
 if strcmp(RUN_TYPE,'vaso')
     CmB = CmB * -1;
     DmB = DmB * -1;
     DmC = DmC * -1;
+    CDmB = CDmB * -1;
 end
 
-CONTRASTS = {CmB, DmB, DmC}; % array of contrasts
-LABELS = {'Confirm - Baseline', 'Disconfirm - Baseline', 'Disconfirm - Confirm'};
+CONTRASTS = {CmB, DmB, DmC, CDmB}; % array of contrasts
+LABELS = {'Confirm - Baseline', 'Disconfirm - Baseline', ...
+    'Disconfirm - Confirm', 'Confirm + Disconfirm - Baseline'};
 
 %% 3.1) CONTRAST ANALYSIS
 

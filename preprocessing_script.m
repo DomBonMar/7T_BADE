@@ -3,8 +3,8 @@
 
 %% 0.1) SCAN INFO AND METADATA
 
-sub = 'U202';
-first_run = false; % if first time running script
+sub = 'U106';
+first_run = true; % if first time running script
 
 N_RUNS = 3;
 RUN_TYPES = ["bold", "vaso"];
@@ -19,11 +19,11 @@ preserve_originals = true; % defacing step
 
 % PREFIXES USED AT EACH STEP
 step_nord = ''; % empty for now
-step_moco = 'r';
+step_moco = 'r_';
 step_boco = 'b';
 step_corg = 'c';
 
-PREFIX_NORD = [step_nord, '_'];
+PREFIX_NORD = step_nord;
 PREFIX_MOCO = [step_moco,PREFIX_NORD];
 PREFIX_BOCO = {PREFIX_MOCO,...
     [step_boco,PREFIX_MOCO]}; % 1 -> bold, 2 -> vaso
@@ -130,13 +130,13 @@ for t = 1:length(RUN_TYPES)
     % locating functional scans
     runs = all_runs{t};
     for r = 1:length(runs)
-        %runs(r) = sprintf('%s/func/%s%s',SUBBIDS,PREFIX_NORD,runs(r));
+        %runs(r) = sprintf('%s/%s%s',FUNCDIR,PREFIX_NORD,runs(r));
         %REVERT ONCE NORDIC FIXED
         runs(r) = sprintf('%s/func/%s',SUBBIDS,runs(r));
     end
 
-    %matlabbatch = motion_correction(runs,SPM,step_moco); SAME THING
-    matlabbatch = motion_correction(runs,SPM,PREFIX_MOCO);
+    matlabbatch = motion_correction(runs,SPM,step_moco); %SAME THING
+    %matlabbatch = motion_correction(runs,SPM,PREFIX_MOCO);
 
     cd(SCRIPTS) % saves job to dir
     save(sprintf('%s_2-motion-correction-%s',sub,typ),'matlabbatch');
@@ -144,16 +144,16 @@ for t = 1:length(RUN_TYPES)
     cd(FUNCDIR) % saves output to func dir
     spm_jobman('run',matlabbatch) % execute the batch
     clear matlabbatch % clear matlabbatch
-
-    % moving files to SPM dir
-    system(sprintf('mv %s/func/mean* %s/func/',SUBBIDS,SPMDIR))
-    system(sprintf('mv %s/func/rp_* %s/func/',SUBBIDS,SPMDIR))
-    system(sprintf('mv %s/func/%s* %s/func/',SUBBIDS,PREFIX_MOCO,SPMDIR))
-    system(sprintf('mv %s/func/*.mat %s/func/',SUBBIDS,SPMDIR))
     
     fprintf("MOTION CORRECTION COMPLETED for %s", typ)
 
 end
+
+% moving files to SPM dir
+system(sprintf('mv %s/func/mean* %s/func/',SUBBIDS,SPMDIR));
+system(sprintf('mv %s/func/rp_* %s/func/',SUBBIDS,SPMDIR));
+system(sprintf('mv %s/func/%s* %s/func/',SUBBIDS,PREFIX_MOCO,SPMDIR));
+system(sprintf('mv %s/func/*.mat %s/func/',SUBBIDS,SPMDIR));
 
 %% 5) CORRECT T2* DEPENDENCY
 
@@ -213,7 +213,7 @@ for t = 1:length(RUN_TYPES)
     end
 end
 
-% min_inds = [3,3]
+% min_inds = [2,2]
 % sprintf('%s,%d,%d',sub,min_inds(1),min_inds(2))
 
 %% 6.2) GENERATING T1-LIKE IMAGE

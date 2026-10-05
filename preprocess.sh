@@ -1,0 +1,57 @@
+#!/bin/bash
+#SBATCH --job-name=NORDIC-test
+#SBATCH --output=logs/%x_%j.out
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=16
+#SBATCH --time=1:00:00
+#SBATCH --mem-per-cpu=10000
+
+# directory list
+export DATADIR="${BASEDIR}/data"
+export BIDSDIR="${DATADIR}/bids"
+export SUBBIDS="${BIDSDIR}/sub-${sub}"
+export PROCDIR="${DATADIR}/processed"
+export DICOMDIR="${DATADIR}/dicom"
+export CODEDIR="${BASEDIR}/code"
+export APPDIR="${BASEDIR}/software"
+participant_file="${BIDSDIR}/participants.tsv"
+
+# getting subject info
+mapfile -t subs < $participant_file
+sub=${subs[$SLURM_ARRAY_TASK_ID]}
+echo "Processing sub $sub"
+
+# loads required module
+module load matlab
+module load fsl
+module load python
+module load dcm2niix
+source ${BASEDIR}/dcm2bids_env/bin/activate
+
+# 1) CONVERTING DICOM INTO NIFTI
+
+echo "Convert dicom to nifti for ${sub}"
+dcm2bids -d "${DICOMDIR}/sub-${sub}" -p ${sub} -c "${CODEDIR}/bids-config.json" -o ${BIDSDIR}
+
+# identifying target scans
+cd "${SUBBIDS}/func"
+vaso=$(ls "*vaso*.nii")
+bold=$(ls "*bold*.nii")
+echo "Vaso scans are $vaso"
+echo "Bold scans are $bold"
+
+# 2) DEFACING SCANS
+
+anat_tags=("UNIT1" "T1map" "INV1" "INV2")
+
+for tag in "${anat_tags[@]}"; do
+	echo "Defacing $tag scan for $sub"
+	scan=$(ls "${SUBBIDS}/anat/*${tag}.nii")
+	pydeface $scan
+done
+
+# 3) NORDIC DENOISING
+
+echo "Applying NORDIC denoising to $sub"
+matlab -batch "13_nordic_denoising('0', '${bold[@]}', '${vaso[@]}', '${SUBBIDS}', '${PROCDIR}', '', 'nord')"
+
