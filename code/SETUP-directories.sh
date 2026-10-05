@@ -13,7 +13,7 @@ mkdir software
 # prepare virtual env for dcm2bids
 module load python
 
-virtualenv --no-dowload $BASEDIR/dcm2bids_env
+virtualenv --no-download $BASEDIR/dcm2bids_env
 source ${BASEDIR}/dcm2bids_env/bin/activate
 pip install --no-index --upgrade pip
 pip install dcm2bids --no-index

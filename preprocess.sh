@@ -53,5 +53,5 @@ done
 # 3) NORDIC DENOISING
 
 echo "Applying NORDIC denoising to $sub"
-matlab -batch "13_nordic_denoising('0', '${bold[@]}', '${vaso[@]}', '${SUBBIDS}', '${PROCDIR}', '', 'nord')"
+matlab -batch "PROC_nordic_denoising('0', '${bold[@]}', '${vaso[@]}', '${SUBBIDS}', '${PROCDIR}', '', 'nord')"
 
