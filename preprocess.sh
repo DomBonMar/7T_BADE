@@ -6,7 +6,7 @@
 #SBATCH --time=0:10:00
 #SBATCH --mem-per-cpu=10000
 
-$BASEDIR=$(pwd)
+BASEDIR=$(pwd)
 
 # directory list
 export DATADIR="${BASEDIR}/data"

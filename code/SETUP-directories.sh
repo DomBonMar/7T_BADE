@@ -19,3 +19,7 @@ pip install --no-index --upgrade pip
 pip install dcm2bids --no-index
 
 module unload python
+
+# gives permissions to run scripts
+chmod u+x ${BASEDIR}/code/SETUP-_directories.sh
+chmod u+x ${BASEDIR}/submit-job.sh
