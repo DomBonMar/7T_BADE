@@ -8,6 +8,14 @@ function out = apply_nordic(noise_volumes,bold_runs,vaso_runs,INDIR,OUTDIR,INFIX
 
 out = 1; % if unsuccessful
 
+disp(noise_volumes)
+disp(bold_runs)
+disp(vaso_runs)
+disp(INDIR)
+disp(OUTDIR)
+disp(INFIX)
+disp(PREFIX)
+
 % converts bash arguments to matlab format
 bold_runs = split(bold_runs, " ");
 vaso_runs = split(vaso_runs, " ");

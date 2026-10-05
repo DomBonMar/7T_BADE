@@ -16,6 +16,7 @@ export DICOMDIR="${DATADIR}/dicom"
 export CODEDIR="${BASEDIR}/code"
 export APPDIR="${BASEDIR}/software"
 participant_file="${BIDSDIR}/participants.tsv"
+config_file="${BASEDIR}/bids-config.json"
 
 # getting subject info
 mapfile -t subs < $participant_file
@@ -34,7 +35,7 @@ source ${BASEDIR}/dcm2bids_env/bin/activate
 # 1) CONVERTING DICOM INTO NIFTI
 
 echo "Convert dicom to nifti for ${sub}"
-dcm2bids -d "${DICOMDIR}/sub-${sub}" -p ${sub} -c "${CODEDIR}/bids-config.json" -o ${BIDSDIR}
+dcm2bids -d "${DICOMDIR}/sub-${sub}" -p ${sub} -c "${BASEDIR}/bids-config.json" -o ${BIDSDIR}
 
 # identifying target scans
 cd "${SUBBIDS}/func"
