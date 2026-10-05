@@ -3,7 +3,7 @@
 #SBATCH --output=logs/%x_%j.out
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=16
-#SBATCH --time=0:10:00
+#SBATCH --time=0:05:00
 #SBATCH --mem-per-cpu=10000
 
 BASEDIR=$(pwd)
@@ -11,7 +11,6 @@ BASEDIR=$(pwd)
 # directory list
 export DATADIR="${BASEDIR}/data"
 export BIDSDIR="${DATADIR}/bids"
-export SUBBIDS="${BIDSDIR}/sub-${sub}"
 export PROCDIR="${DATADIR}/processed"
 export DICOMDIR="${DATADIR}/dicom"
 export CODEDIR="${BASEDIR}/code"
@@ -23,6 +22,8 @@ mapfile -t subs < $participant_file
 sub=${subs[$SLURM_ARRAY_TASK_ID]}
 echo "Processing sub $sub"
 
+export SUBBIDS="${BIDSDIR}/sub-${sub}"
+
 # loads required module
 module load matlab
 module load fsl
@@ -33,7 +34,7 @@ source ${BASEDIR}/dcm2bids_env/bin/activate
 # 1) CONVERTING DICOM INTO NIFTI
 
 echo "Convert dicom to nifti for ${sub}"
-#dcm2bids -d "${DICOMDIR}/sub-${sub}" -p ${sub} -c "${CODEDIR}/bids-config.json" -o ${BIDSDIR}
+dcm2bids -d "${DICOMDIR}/sub-${sub}" -p ${sub} -c "${CODEDIR}/bids-config.json" -o ${BIDSDIR}
 
 # identifying target scans
 cd "${SUBBIDS}/func"
@@ -49,7 +50,7 @@ anat_tags=("UNIT1" "T1map" "INV1" "INV2")
 for tag in "${anat_tags[@]}"; do
 	echo "Defacing $tag scan for $sub"
 	scan=$(ls "${SUBBIDS}/anat/*${tag}.nii")
-	#pydeface $scan
+	pydeface $scan
 done
 
 # 3) NORDIC DENOISING
