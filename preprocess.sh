@@ -40,8 +40,8 @@ dcm2bids -d "${DICOMDIR}/sub-${sub}" -p ${sub} -c "${BASEDIR}/bids-config.json" 
 
 # identifying target scans
 cd "${SUBBIDS}/func"
-vaso=$(find -name "*vaso.nii")
-bold=$(find -name "*bold.nii")
+vaso=$(find -name "*vaso.nii" -printf "%P\n")
+bold=$(find -name "*bold.nii" -printf "%P\n")
 echo "Vaso scans are $vaso"
 echo "Bold scans are $bold"
 
@@ -52,17 +52,17 @@ anat_tags=("UNIT1" "T1map" "INV1" "INV2")
 cd "${SUBBIDS}/anat"
 for tag in "${anat_tags[@]}"; do
 	echo "Defacing $tag scan for $sub"
-	scan=$(find -name "*${tag}.nii")
+	scan=$(find -name "*${tag}.nii" -printf "%P\n")
 	pydeface $scan
 
 	echo "Renaming defaced scan"
 	mv $scan "original-${scan}"
-	nodeface=$(find -name "*defaced.nii")
+	nodeface=$(find -name "*defaced.nii" -printf "%P\n")
 	mv $nodeface $scan
 done
 
 # 3) NORDIC DENOISING
 
 echo "Applying NORDIC denoising to $sub"
-matlab -batch "addpath('${CODEDIR}'); PROC_nordic_denoising('0', '${bold[@]}', '${vaso[@]}', '${SUBBIDS}', '${PROCDIR}', '', 'nord'); exit"
+matlab -batch "addpath('${CODEDIR}'); PROC_nordic_denoising('0', '${bold}', '${vaso}', '${SUBBIDS}', '${PROCDIR}', '', 'nord'); exit"
 
