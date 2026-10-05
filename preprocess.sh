@@ -11,7 +11,6 @@ BASEDIR=$(pwd)
 # directory list
 export DATADIR="${BASEDIR}/data"
 export BIDSDIR="${DATADIR}/bids"
-export PROCDIR="${DATADIR}/processed"
 export DICOMDIR="${DATADIR}/dicom"
 export CODEDIR="${BASEDIR}/code"
 export APPDIR="${BASEDIR}/software"
@@ -24,6 +23,8 @@ sub=${subs[$SLURM_ARRAY_TASK_ID]}
 echo "Processing sub $sub"
 
 export SUBBIDS="${BIDSDIR}/sub-${sub}"
+export PROCDIR="${DATADIR}/processed/sub-${sub}"
+mkdir -p $PROCDIR
 
 # loads required module
 module load matlab
@@ -48,10 +49,16 @@ echo "Bold scans are $bold"
 
 anat_tags=("UNIT1" "T1map" "INV1" "INV2")
 
+cd "${SUBBIDS}/anat"
 for tag in "${anat_tags[@]}"; do
 	echo "Defacing $tag scan for $sub"
-	scan=$(ls "${SUBBIDS}/anat/*${tag}.nii")
+	scan=$(ls "*${tag}.nii")
 	pydeface $scan
+
+	echo "Renaming defaced scan"
+	mv $scan "original-${scan}"
+	nodeface=$(ls "*defaced.nii")
+	mv $nodeface $scan
 done
 
 # 3) NORDIC DENOISING
