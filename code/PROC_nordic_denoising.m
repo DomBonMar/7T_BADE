@@ -30,8 +30,8 @@ for r = 1:length(runs)
 
     fprintf("Applying nordic to %s run %d\n",runtype,r)
 
-    infile = sprintf('%s/%s%s',INDIR,INFIX,bold_runs(r));
-    outfile = sprintf('%s%s',PREFIX,bold_runs(r));
+    infile = sprintf('%s/%s%s',INDIR,INFIX,runs(r));
+    outfile = sprintf('%s%s',PREFIX,runs(r));
 
     if isfile(sprintf("%s/%s",OUTDIR,outfile))
 	    disp('Skipping: file already computed.')

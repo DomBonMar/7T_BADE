@@ -92,6 +92,12 @@ echo -e "\nApplying motion correction to $sub\n"
 
 matlab -batch "addpath('${CODEDIR}'); addpath(genpath('${APPDIR}')); [bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); PROC_motion_correction(bold, 'bold', '${PROCDIR}', '${PROCDIR}', 'nord-', 'moco-'); PROC_motion_correction(vaso, 'vaso', '${PROCDIR}', '${PROCDIR}', 'nord-', 'moco-'); exit"
 
+# Renaming files
+
+rename 'meannord-' 'mean-' *
+rename 'moco-nord-' 'moco-' *
+rename 'rp_nord-' 'rp_' *
+
 # 5) BOLD CORRECTION
 
 echo -e "Applying BOLD correction to $sub\n"
