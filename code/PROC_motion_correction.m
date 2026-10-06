@@ -8,12 +8,12 @@ out = 1;
 
 cd(OUTDIR)
 
-fprintf("Running on %s run",runtype)
+fprintf("Running on %s run\n",runtype)
 
 % preparing batch
 for i = 1:length(runs)
 
-    run = sprintf('%s/%s%s',INDIR,INFIX,runs(r));
+    run = sprintf('%s/%s%s',INDIR,INFIX,runs(i));
 
     matlabbatch{i}.spm.spatial.realign.estwrite.data = {cellstr(run)};
     matlabbatch{i}.spm.spatial.realign.estwrite.eoptions.quality = 0.95;

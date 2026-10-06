@@ -1,4 +1,4 @@
-function out = apply_nordic(noise_volumes,bold_runs,vaso_runs,INDIR,OUTDIR,INFIX,PREFIX)
+function out = apply_nordic(noise_volumes,runs,runtype,INDIR,OUTDIR,INFIX,PREFIX)
 
 % code inspired by https://github.com/LasseKnudsen1/NORDIC-VASO
 % mirrors structure of NORDIC-VASO_wrapper.m
@@ -7,6 +7,7 @@ function out = apply_nordic(noise_volumes,bold_runs,vaso_runs,INDIR,OUTDIR,INFIX
 % noise_volumes: number of appended noise-volumes at the end of each timeseries
 
 out = 1; % if unsuccessful
+cd(OUTDIR)
 
 % converts bash arguments to matlab format
 %bold_runs = split(bold_runs, " ");
@@ -21,41 +22,28 @@ ARG.save_add_info=0;
 ARG.save_residual_matlab=0;
 ARG.factor_error=1;
 ARG.noise_volume_last=str2num(noise_volumes);
-ARG.DIROUT=OUTDIR;
+ARG.DIROUT=sprintf("%s/",OUTDIR);
 
 % running NORDIC (prefix i)
 
-for r = 1:length(bold_runs)
+for r = 1:length(runs)
 
-    fprintf("Applying nordic to bold run %d\n",r)
+    fprintf("Applying nordic to %s run %d\n",runtype,r)
 
-    % bold runs
     infile = sprintf('%s/%s%s',INDIR,INFIX,bold_runs(r));
     outfile = sprintf('%s%s',PREFIX,bold_runs(r));
 
-    fprintf("Using file %s",infile)
-    fprintf("Renaming output to %s",outfile)
-
-    NIFTI_NORDIC(infile, "", outfile, ARG);
-
-    if isfile(outfile)
+    if isfile(sprintf("%s/%s",OUTDIR,outfile))
 	    disp('Skipping: file already computed.')
+	    continue;
+    else
+	    fprintf("Using file %s\n",infile)
+	    fprintf("Renaming output to %s\n",outfile)
+	    NIFTI_NORDIC(infile, "", outfile, ARG);
     end
     
     fprintf("Applying nordic to vaso run %d\n",r)
 
-    % vaso runs
-    infile = sprintf('%s/%s%s',INDIR,INFIX,vaso_runs(r));
-    outfile = sprintf('%s%s',PREFIX,vaso_runs(r));
-    
-    fprintf("Using file %s",infile)
-    fprintf("Renaming output to %s",outfile)
-
-    NIFTI_NORDIC(infile, "", outfile, ARG);
-
-    if isfile(outfile)
-	    disp('Skipping: file already computed.')
-    end
 end
 
 out = 0;

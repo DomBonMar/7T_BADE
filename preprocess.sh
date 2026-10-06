@@ -17,6 +17,9 @@ export APPDIR="${BASEDIR}/software"
 participant_file="${BIDSDIR}/participants.tsv"
 config_file="${BASEDIR}/bids-config.json"
 
+# adding software to path
+export PATH="${APPDIR}:${PATH}"
+
 # getting subject info
 mapfile -t subs < $participant_file
 sub=${subs[$SLURM_ARRAY_TASK_ID]}
@@ -79,13 +82,13 @@ fi
 
 cd ${PROCDIR}
 echo -e "Applying NORDIC denoising to $sub\n"
-matlab -batch "addpath('${CODEDIR}'); addpath(genpath('${APPDIR}')); [bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); PROC_nordic_denoising('0', bold, vaso, '${SUBBIDS}/func', '${PROCDIR}', '', 'nord-'); exit"
+matlab -batch "addpath('${CODEDIR}'); addpath(genpath('${APPDIR}')); [bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); PROC_nordic_denoising('0', bold, 'bold', '${SUBBIDS}/func', '${PROCDIR}', '', 'nord-'); PROC_nordic_denoising('0', vaso, 'vaso', '${SUBBIDS}/func', '${PROCDIR}', '', 'nord-'); exit"
 
 # might need to rename files (maybe)
 
 # 4) MOTION CORRECTION
 
-echo -e "Applying motion correction to $sub\n"
+echo -e "\nApplying motion correction to $sub\n"
 
 matlab -batch "addpath('${CODEDIR}'); addpath(genpath('${APPDIR}')); [bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); PROC_motion_correction(bold, 'bold', '${PROCDIR}', '${PROCDIR}', 'nord-', 'moco-'); PROC_motion_correction(vaso, 'vaso', '${PROCDIR}', '${PROCDIR}', 'nord-', 'moco-'); exit"
 
