@@ -8,20 +8,9 @@ function out = apply_nordic(noise_volumes,bold_runs,vaso_runs,INDIR,OUTDIR,INFIX
 
 out = 1; % if unsuccessful
 
-disp(noise_volumes)
-disp(bold_runs)
-disp(vaso_runs)
-disp(INDIR)
-disp(OUTDIR)
-disp(INFIX)
-disp(PREFIX)
-
 % converts bash arguments to matlab format
-bold_runs = split(bold_runs, " ");
-vaso_runs = split(vaso_runs, " ");
-
-disp(bold_runs)
-disp(vaso_runs)
+%bold_runs = split(bold_runs, " ");
+%vaso_runs = split(vaso_runs, " ");
 
 % ARG structure following VASO wrapper
 ARG = struct;
@@ -41,15 +30,32 @@ for r = 1:length(bold_runs)
     fprintf("Applying nordic to bold run %d\n",r)
 
     % bold runs
-    NIFTI_NORDIC(sprintf('%s/%s%s',INDIR,INFIX,bold_runs(r)), "", ...
-                 sprintf('%s%s',PREFIX,bold_runs(r)), ARG);
+    infile = sprintf('%s/%s%s',INDIR,INFIX,bold_runs(r));
+    outfile = sprintf('%s%s',PREFIX,bold_runs(r));
+
+    fprintf("Using file %s",infile)
+    fprintf("Renaming output to %s",outfile)
+
+    NIFTI_NORDIC(infile, "", outfile, ARG);
+
+    if isfile(outfile)
+	    disp('Skipping: file already computed.')
+    end
     
     fprintf("Applying nordic to vaso run %d\n",r)
 
     % vaso runs
-    NIFTI_NORDIC(sprintf('%s/%s%s',INDIR,INFIX,vaso_runs(r)), "", ...
-                 sprintf('%s%s',PREFIX,vaso_runs(r)), ARG);
+    infile = sprintf('%s/%s%s',INDIR,INFIX,vaso_runs(r));
+    outfile = sprintf('%s%s',PREFIX,vaso_runs(r));
+    
+    fprintf("Using file %s",infile)
+    fprintf("Renaming output to %s",outfile)
 
+    NIFTI_NORDIC(infile, "", outfile, ARG);
+
+    if isfile(outfile)
+	    disp('Skipping: file already computed.')
+    end
 end
 
 out = 0;

@@ -139,13 +139,7 @@ for t = 1:length(RUN_TYPES)
     %matlabbatch = motion_correction(runs,SPM,PREFIX_MOCO);
 
     cd(SCRIPTS) % saves job to dir
-    save(sprintf('%s_2-motion-correction-%s',sub,typ),'matlabbatch');
-
-    cd(FUNCDIR) % saves output to func dir
-    spm_jobman('run',matlabbatch) % execute the batch
-    clear matlabbatch % clear matlabbatch
     
-    fprintf("MOTION CORRECTION COMPLETED for %s", typ)
 
 end
 
