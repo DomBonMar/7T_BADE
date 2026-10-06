@@ -21,7 +21,7 @@ ARG.save_gfactor_map=0;
 ARG.save_add_info=0;
 ARG.save_residual_matlab=0;
 ARG.factor_error=1;
-ARG.noise_volume_last=str2num(noise_volumes);
+ARG.noise_volume_last=str2double(noise_volumes);
 ARG.DIROUT=sprintf("%s/",OUTDIR);
 
 % running NORDIC (prefix i)
@@ -30,8 +30,8 @@ for r = 1:length(runs)
 
     fprintf("Applying nordic to %s run %d\n",runtype,r)
 
-    infile = sprintf('%s/%s%s',INDIR,INFIX,runs(r));
-    outfile = sprintf('%s%s',PREFIX,runs(r));
+    infile = sprintf("%s/%s%s",INDIR,INFIX,runs(r));
+    outfile = sprintf("%s%s",PREFIX,runs(r));
 
     if isfile(sprintf("%s/%s",OUTDIR,outfile))
 	    disp('Skipping: file already computed.')
@@ -41,8 +41,6 @@ for r = 1:length(runs)
 	    fprintf("Renaming output to %s\n",outfile)
 	    NIFTI_NORDIC(infile, "", outfile, ARG);
     end
-    
-    fprintf("Applying nordic to vaso run %d\n",r)
 
 end
 

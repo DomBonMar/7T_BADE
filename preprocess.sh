@@ -18,7 +18,7 @@ participant_file="${BIDSDIR}/participants.tsv"
 config_file="${BASEDIR}/bids-config.json"
 
 # adding software to path
-export PATH="${APPDIR}:${PATH}"
+export PATH="${APPDIR}/LayNii:${PATH}"
 
 # getting subject info
 mapfile -t subs < $participant_file
