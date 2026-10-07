@@ -22,7 +22,7 @@ ARG.save_add_info=0;
 ARG.save_residual_matlab=0;
 ARG.factor_error=1;
 ARG.noise_volume_last=str2double(noise_volumes);
-ARG.DIROUT=[OUTDIR '/'];
+ARG.DIROUT=compose("%s/",OUTDIR);
 
 % running NORDIC (prefix i)
 
@@ -30,10 +30,10 @@ for r = 1:length(runs)
 
     fprintf("Applying nordic to %s run %d\n",runtype,r)
 
-    infile = [INDIR '/' INFIX runs(r)];
-    outfile = [PREFIX runs(r)];
+    infile = compose("%s/%s%s",INDIR,INFIX,runs(r));
+    outfile = compose("%s%s",PREFIX,runs(r));
 
-    if isfile([OUTDIR '/' outfile])
+    if isfile(compose("%s/%s",OUTDIR,outfile))
 	    disp('Skipping: file already computed.')
 	    continue;
     else
