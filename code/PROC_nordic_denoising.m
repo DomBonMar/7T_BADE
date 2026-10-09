@@ -15,15 +15,6 @@ cd(OUTDIR)
 % converting char input into string
 INDIR = string(INDIR); INFIX = string(INFIX);
 
-disp(runs)
-fprintf("Run array has type %s\n",class(runs))
-disp(runs(1))
-fprintf("Individual run has type %s\n",class(runs(1)))
-fprintf("INDIR is %s with type %s\n",INDIR,class(INDIR))
-fprintf("OUTDIR is %s with type %s\n",OUTDIR,class(OUTDIR))
-fprintf("INFIX is %s with type %s\n",INFIX,class(INFIX))
-fprintf("PREFIX is %s with type %s\n",PREFIX,class(PREFIX))
-
 % converts bash arguments to matlab format
 %bold_runs = split(bold_runs, " ");
 %vaso_runs = split(vaso_runs, " ");
@@ -52,8 +43,8 @@ for r = 1:length(runs)
 	    disp('Skipping: file already computed.')
 	    continue;
     else
-	    fprintf("Using file %s of type %s\n",infile,class(infile))
-	    fprintf("Renaming output to %s of type %s\n",outfile,class(outfile))
+	    fprintf("Using file %s\n",infile)
+	    fprintf("Renaming output to %s\n",outfile)
 	    NIFTI_NORDIC(infile, "", outfile, ARG);
     end
 

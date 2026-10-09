@@ -3,7 +3,7 @@
 #SBATCH --output=logs/%x_%j.out
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=16
-#SBATCH --time=2:00:00
+#SBATCH --time=2:30:00
 #SBATCH --mem-per-cpu=10000
 
 BASEDIR=$(pwd)
@@ -29,7 +29,7 @@ export SUBBIDS="${BIDSDIR}/sub-${sub}"
 export PROCDIR="${DATADIR}/processed/sub-${sub}"
 mkdir -p $PROCDIR
 
-# loads required module
+# loads required modules
 module load matlab
 module load fsl
 module load afni
@@ -81,15 +81,22 @@ fi
 # 3) NORDIC DENOISING
 
 cd ${PROCDIR}
+echo "-------------------------------------------"
 echo -e "Applying NORDIC denoising to $sub\n"
+echo "-------------------------------------------"
 matlab -batch "addpath('${CODEDIR}'); addpath(genpath('${APPDIR}')); [bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); PROC_nordic_denoising('0', bold, 'bold', '${SUBBIDS}/func', '${PROCDIR}', '', 'nord-'); PROC_nordic_denoising('0', vaso, 'vaso', '${SUBBIDS}/func', '${PROCDIR}', '', 'nord-'); exit"
 
-# might need to rename files (maybe)
+# Renaming files
+rename '.nii.nii' '.nii' *
+# might want to delete the .mat files produced
 
 # 4) MOTION CORRECTION
 
+echo "-------------------------------------------"
 echo -e "\nApplying motion correction to $sub\n"
+echo "-------------------------------------------"
 
+echo -e "\nApplying motion correction to $sub\n"
 matlab -batch "addpath('${CODEDIR}'); addpath(genpath('${APPDIR}')); [bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); PROC_motion_correction(bold, 'bold', '${PROCDIR}', '${PROCDIR}', 'nord-', 'moco-'); PROC_motion_correction(vaso, 'vaso', '${PROCDIR}', '${PROCDIR}', 'nord-', 'moco-'); exit"
 
 # Renaming files
@@ -100,7 +107,9 @@ rename 'rp_nord-' 'rp_' *
 
 # 5) BOLD CORRECTION
 
+echo "-------------------------------------------"
 echo -e "Applying BOLD correction to $sub\n"
+echo "-------------------------------------------"
 
 for vasorun in $vaso; do
 
@@ -114,4 +123,6 @@ for vasorun in $vaso; do
 
 done
 
+echo "************************************"
 echo "COMPLETED PREPROCESSING PHASE 1!"
+echo "************************************"
