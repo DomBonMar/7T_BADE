@@ -9,8 +9,14 @@ function out = PROC_nordic_denoising(noise_volumes,runs,runtype,INDIR,OUTDIR,INF
 out = 1; % if unsuccessful
 cd(OUTDIR)
 
+disp(runs)
 fprintf("Run array has type %s\n",class(runs))
+disp(runs(1))
 fprintf("Individual run has type %s\n",class(runs(1)))
+fprintf("INDIR is %s with type %s\n",INDIR,class(INDIR))
+fprintf("OUTDIR is %s with type %s\n",OUTDIR,class(OUTDIR))
+fprintf("INFIX is %s with type %s\n",INFIX,class(INFIX))
+fprintf("PREFIX is %s with type %s\n",PREFIX,class(PREFIX))
 
 % converts bash arguments to matlab format
 %bold_runs = split(bold_runs, " ");
