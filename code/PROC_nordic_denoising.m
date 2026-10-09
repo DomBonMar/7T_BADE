@@ -9,6 +9,9 @@ function out = PROC_nordic_denoising(noise_volumes,runs,runtype,INDIR,OUTDIR,INF
 out = 1; % if unsuccessful
 cd(OUTDIR)
 
+fprintf("Run array has type %s\n",class(runs))
+fprintf("Individual run has type %s\n",class(runs(1)))
+
 % converts bash arguments to matlab format
 %bold_runs = split(bold_runs, " ");
 %vaso_runs = split(vaso_runs, " ");
@@ -37,8 +40,8 @@ for r = 1:length(runs)
 	    disp('Skipping: file already computed.')
 	    continue;
     else
-	    fprintf("Using file %s\n",infile)
-	    fprintf("Renaming output to %s\n",outfile)
+	    fprintf("Using file %s of type %s\n",infile,class(infile))
+	    fprintf("Renaming output to %s of type %s\n",outfile,class(outfile))
 	    NIFTI_NORDIC(infile, "", outfile, ARG);
     end
 
