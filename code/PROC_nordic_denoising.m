@@ -9,6 +9,10 @@ function out = PROC_nordic_denoising(noise_volumes,runs,runtype,INDIR,OUTDIR,INF
 out = 1; % if unsuccessful
 cd(OUTDIR)
 
+% converting char input into string
+INDIR = string(INDIR); OUTDIR = string(OUTDIR);
+INFIX = string(INFIX); PREFIX = string(PREFIX);
+
 disp(runs)
 fprintf("Run array has type %s\n",class(runs))
 disp(runs(1))
