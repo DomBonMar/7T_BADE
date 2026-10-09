@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=NORDIC-test
+#SBATCH --job-name=PREPROC
 #SBATCH --output=logs/%x_%j.out
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=16
@@ -39,7 +39,7 @@ source ${BASEDIR}/dcm2bids_env/bin/activate
 
 # 1) CONVERTING DICOM INTO NIFTI
 
-if [ ! -d ${DICOMDIR}/sub-${sub} ]; then
+if [ ! -d ${SUBBIDS} ]; then
 	echo -e "Convert dicom to nifti for ${sub}\n"
 	dcm2bids -d "${DICOMDIR}/sub-${sub}" -p ${sub} -c "${BASEDIR}/bids-config.json" -o ${BIDSDIR}
 else
@@ -113,6 +113,12 @@ echo "-------------------------------------------"
 
 for vasorun in $vaso; do
 
+	# checks if step already run
+	if [ -f "${PROCDIR}/noboco-${vasorun}" ]; then
+		echo -e "Skipping run ${vasorun}\n"
+		continue
+	fi
+
 	boldrun="${vasorun/vaso/bold}"
 
 	echo "Correcting run $vasorun"
@@ -122,6 +128,11 @@ for vasorun in $vaso; do
 	mv -v "${PROCDIR}/VASO_LN.nii" "${PROCDIR}/moco-${vasorun}"
 
 done
+
+# 6) REGISTRATION PREPERATION
+
+echo "Checking motion registration details"
+matlab -batch "addpath('${CODEDIR}'); [bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); PROC_view_moco(bold, 'bold','${PROCDIR}'); PROC_view_moco(vaso, 'vaso','${PROCDIR}'); exit"
 
 echo "************************************"
 echo "COMPLETED PREPROCESSING PHASE 1!"
