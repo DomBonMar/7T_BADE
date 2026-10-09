@@ -4,14 +4,16 @@ function out = PROC_nordic_denoising(noise_volumes,runs,runtype,INDIR,OUTDIR,INF
 % mirrors structure of NORDIC-VASO_wrapper.m
 % modified to fit our data
 
+% because of how NIFTI_NORDIC gets called, infile must be a string, outfile
+% must be a char
+
 % noise_volumes: number of appended noise-volumes at the end of each timeseries
 
 out = 1; % if unsuccessful
 cd(OUTDIR)
 
 % converting char input into string
-INDIR = string(INDIR); OUTDIR = string(OUTDIR);
-INFIX = string(INFIX); PREFIX = string(PREFIX);
+INDIR = string(INDIR); INFIX = string(INFIX);
 
 disp(runs)
 fprintf("Run array has type %s\n",class(runs))
@@ -35,7 +37,7 @@ ARG.save_add_info=0;
 ARG.save_residual_matlab=0;
 ARG.factor_error=1;
 ARG.noise_volume_last=str2double(noise_volumes);
-ARG.DIROUT=compose("%s/",OUTDIR);
+ARG.DIROUT=sprintf('%s/',OUTDIR);
 
 % running NORDIC (prefix i)
 
@@ -44,7 +46,7 @@ for r = 1:length(runs)
     fprintf("Applying nordic to %s run %d\n",runtype,r)
 
     infile = compose("%s/%s%s",INDIR,INFIX,runs(r));
-    outfile = compose("%s%s",PREFIX,runs(r));
+    outfile = sprintf('%s%s',PREFIX,runs(r));
 
     if isfile(compose("%s/%s",OUTDIR,outfile))
 	    disp('Skipping: file already computed.')
