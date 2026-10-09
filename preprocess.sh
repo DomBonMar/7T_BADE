@@ -132,7 +132,7 @@ done
 # 6) REGISTRATION PREPERATION
 
 echo "Checking motion registration details"
-matlab -batch "addpath('${CODEDIR}'); [bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); PROC_view_moco(bold, 'bold','${PROCDIR}'); PROC_view_moco(vaso, 'vaso','${PROCDIR}'); exit"
+matlab -batch "addpath('${CODEDIR}'); [bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); PROC_view_moco(bold, 'bold','${PROCDIR}','${PROCDIR}'); PROC_view_moco(vaso, 'vaso','${PROCDIR}','${PROCDIR}'); exit"
 
 echo "************************************"
 echo "COMPLETED PREPROCESSING PHASE 1!"

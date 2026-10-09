@@ -1,4 +1,4 @@
-function out = PROC_view_moco(runs,runtype,OUTDIR)
+function out = PROC_view_moco(runs,runtype,INDIR,OUTDIR)
 
 % generates plot to view average motion per run
 % GOAL: coregister to the run with least motion
@@ -11,7 +11,7 @@ fprintf("Generating plot for %s motion\n",runtype)
 for r = 1:N_RUNS
 
     [~,filename,~] = fileparts(runs(r));
-    filename = sprintf('%s/rp_%s.txt',FUNCDIR,filename);
+    filename = sprintf('%s/rp_%s.txt',INDIR,filename);
     moco_info = load(filename);
     
     subplot(1,r,r)
