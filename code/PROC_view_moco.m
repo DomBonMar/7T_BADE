@@ -10,13 +10,13 @@ fprintf("Generating plot for %s motion\n",runtype)
 
 for r = 1:N_RUNS
 
-    [~,filename,~] = fileparts(runs(r));
-    filename = sprintf('%s/rp_%s.txt',INDIR,filename);
+    [~,file,~] = fileparts(runs(r));
+    filename = sprintf('%s/rp_%s.txt',INDIR,file);
     moco_info = load(filename);
     
-    subplot(1,r,r)
+    subplot(1,N_RUNS,r)
     plot(moco_info)
-    title(sprintf('Motion for %s run %d',runtype,r))
+    title(sprintf('Motion for %s',file))
 
 end
 

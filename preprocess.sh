@@ -3,10 +3,11 @@
 #SBATCH --output=logs/%x_%j.out
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=16
-#SBATCH --time=2:30:00
+#SBATCH --time=2:00:00
 #SBATCH --mem-per-cpu=10000
 
 BASEDIR=$(pwd)
+NUM_ANAT=4 # number of anatomical scans
 
 # directory list
 export DATADIR="${BASEDIR}/data"
@@ -39,6 +40,11 @@ source ${BASEDIR}/dcm2bids_env/bin/activate
 
 # 1) CONVERTING DICOM INTO NIFTI
 
+echo "-------------------------------------------"
+echo -e "\nApplying bids conversion to $sub\n"
+echo "-------------------------------------------"
+
+
 if [ ! -d ${SUBBIDS} ]; then
 	echo -e "Convert dicom to nifti for ${sub}\n"
 	dcm2bids -d "${DICOMDIR}/sub-${sub}" -p ${sub} -c "${BASEDIR}/bids-config.json" -o ${BIDSDIR}
@@ -55,12 +61,16 @@ echo -e "Bold scans are $bold\n"
 
 # 2) DEFACING SCANS
 
+echo "-------------------------------------------"
+echo -e "\nApplying defacing to $sub\n"
+echo "-------------------------------------------"
+
 anat_tags=("UNIT1" "T1map" "INV1" "INV2")
 
 cd "${SUBBIDS}/anat"
 
-orig=$(find -name "original*.nii" -printf "%P\n")
-if [ ${#orig[@]} -gt 0 ]; then
+orig=$( original*.nii  )
+if [ ${#orig[@]} -ge ${NUM_ANAT} ]; then
 
 	echo -e "Defacing already completed for $sub\n"
 
@@ -72,9 +82,9 @@ else
 		pydeface $scan
 
 		echo -e "Renaming defaced scan\n"
-		mv $scan "original-${scan}"
+		mv -v $scan "original-${scan}"
 		nodeface=$(find -name "*defaced.nii" -printf "%P\n")
-		mv $nodeface $scan
+		mv -v $nodeface $scan
 	done
 fi
 
@@ -82,8 +92,9 @@ fi
 
 cd ${PROCDIR}
 echo "-------------------------------------------"
-echo -e "Applying NORDIC denoising to $sub\n"
+echo -e "\nApplying NORDIC denoising to $sub\n"
 echo "-------------------------------------------"
+
 matlab -batch "addpath('${CODEDIR}'); addpath(genpath('${APPDIR}')); [bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); PROC_nordic_denoising('0', bold, 'bold', '${SUBBIDS}/func', '${PROCDIR}', '', 'nord-'); PROC_nordic_denoising('0', vaso, 'vaso', '${SUBBIDS}/func', '${PROCDIR}', '', 'nord-'); exit"
 
 # Renaming files
@@ -96,7 +107,6 @@ echo "-------------------------------------------"
 echo -e "\nApplying motion correction to $sub\n"
 echo "-------------------------------------------"
 
-echo -e "\nApplying motion correction to $sub\n"
 matlab -batch "addpath('${CODEDIR}'); addpath(genpath('${APPDIR}')); [bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); PROC_motion_correction(bold, 'bold', '${PROCDIR}', '${PROCDIR}', 'nord-', 'moco-'); PROC_motion_correction(vaso, 'vaso', '${PROCDIR}', '${PROCDIR}', 'nord-', 'moco-'); exit"
 
 # Renaming files
@@ -108,7 +118,7 @@ rename 'rp_nord-' 'rp_' *
 # 5) BOLD CORRECTION
 
 echo "-------------------------------------------"
-echo -e "Applying BOLD correction to $sub\n"
+echo -e "\nApplying BOLD correction to $sub\n"
 echo "-------------------------------------------"
 
 for vasorun in $vaso; do
@@ -131,7 +141,10 @@ done
 
 # 6) REGISTRATION PREPERATION
 
-echo "Checking motion registration details"
+echo "-------------------------------------------"
+echo -e "\nChecking motion correction details for $sub\n"
+echo "-------------------------------------------"
+
 matlab -batch "addpath('${CODEDIR}'); [bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); PROC_view_moco(bold, 'bold','${PROCDIR}','${PROCDIR}'); PROC_view_moco(vaso, 'vaso','${PROCDIR}','${PROCDIR}'); exit"
 
 echo "************************************"

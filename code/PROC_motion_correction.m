@@ -48,7 +48,7 @@ if n_runs ~= 0
     clear matlabbatch % clear matlabbatch
 end
 
-fprintf("MOTION CORRECTION COMPLETED for %s", runtype)
+fprintf("MOTION CORRECTION COMPLETED for %s\n", runtype)
     
 out = 0;
 
