@@ -1,0 +1,31 @@
+function out = PROC_smoothing(runs,runtype,FUNCDIR,INFIX,PREFIX)
+
+% runs >> array containing filenames of all functional runs
+% FUNCDIR >> folder with functional scans
+
+out = 1;
+n_runs = 0;
+fprintf("Running smoothing on %s runs\n",runtype)
+
+% list of func (wr files)
+wr_runs = [];
+for r = 1:length(runs)
+
+    % checks if output already generated
+    if isfile(compose("%s/%s%s",FUNCDIR,PREFIX,runs(r)))
+	    fprintf('Skipping: file %s already computed.\n',runs(r))
+	    continue;
+    end
+
+    wr_runs{r} = sprintf('%s/w%sr_%s',FUNCDIR,tag,runs(r));
+end
+
+matlabbatch{1}.spm.spatial.smooth.data = cellstrr_runs;
+matlabbatch{1}.spm.spatial.smooth.fwhm = [2 2 2];
+matlabbatch{1}.spm.spatial.smooth.dtype = 0;
+matlabbatch{1}.spm.spatial.smooth.im = 0;
+matlabbatch{1}.spm.spatial.smooth.prefix = PREFIX;
+
+out = 0;
+
+end

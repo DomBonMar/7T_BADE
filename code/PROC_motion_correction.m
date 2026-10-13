@@ -9,7 +9,7 @@ n_runs = 0;
 
 cd(OUTDIR)
 
-fprintf("Running on %s run\n",runtype)
+fprintf("Running on %s runs\n",runtype)
 
 % preparing batch
 for r = 1:length(runs)
@@ -42,7 +42,6 @@ end
 
 % running process
 
-%save(sprintf('%s_2-motion-correction-%s',sub,typ),'matlabbatch');
 if n_runs ~= 0
     spm_jobman('run',matlabbatch) % execute the batch
     clear matlabbatch % clear matlabbatch

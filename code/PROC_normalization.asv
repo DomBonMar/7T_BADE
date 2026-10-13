@@ -1,0 +1,30 @@
+function matlabbatch = PROC_normalization(runs,ANATDIR,FUNCDIR)
+
+% generates coregistration batch using SPM
+
+% runs >> array containing filenames of all functional runs
+% ANATDIR >> folder with anatomical scans
+% FUNCDIR >> folder with functional scans
+
+for i = 1:length(runs)
+    
+    filelist{1} = sprintf('%s/%sr_%s',FUNCDIR,tag,runs(i));
+    [~,run,~] = fileparts(runs(i));
+
+    % deformation field (y_ file)
+    matlabbatch{i}.spm.spatial.normalise.write.subj.def = {sprintf('%s/y_anat-%s',ANATDIR,runs(i))};
+    % realigned func file + layered ROI masks
+    matlabbatch{i}.spm.spatial.normalise.write.subj.resample = filelist;
+    % other params
+    matlabbatch{i}.spm.spatial.normalise.write.woptions.bb = [-78 -112 -70                                                        
+        78 76 85];
+    matlabbatch{i}.spm.spatial.normalise.write.woptions.vox = [1 1 1];
+    matlabbatch{i}.spm.spatial.normalise.write.woptions.interp = 4;
+    matlabbatch{i}.spm.spatial.normalise.write.woptions.prefix = 'w';
+
+end
+
+fprintf("NORMALIZATION COMPLETED")
+out = 0;
+
+end

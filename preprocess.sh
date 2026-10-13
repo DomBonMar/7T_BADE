@@ -139,7 +139,7 @@ for vasorun in $vaso; do
 
 done
 
-# 6) REGISTRATION PREPERATION
+# 5.5) REGISTRATION PREPERATION
 
 echo "-------------------------------------------"
 echo -e "\nChecking motion correction details for $sub\n"
@@ -149,4 +149,46 @@ matlab -batch "addpath('${CODEDIR}'); [bold, vaso, anat] = get_images('${sub}', 
 
 echo "************************************"
 echo "COMPLETED PREPROCESSING PHASE 1!"
+echo "************************************"
+
+# 6) COREGISTRATION (func to anat)
+
+echo "-------------------------------------------"
+echo -e "\nApplying anat2func coregistration for $sub\n"
+echo "-------------------------------------------"
+
+matlab -batch "addpath('${CODEDIR}'); addpath(genpath('${APPDIR}')); [bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); PROC_coregistration(bold,'bold',anat,'${PROCDIR}','${SUBBIDS}/anat','moco-','creg-'); PROC_coregistration(vaso,'vaso',anat,'${PROCDIR}','${SUBBIDS}/anat','moco-','creg-'); exit"
+
+rename 'creg-moco-' 'creg-' *
+
+# 7) SEGMENTATION
+
+echo "-------------------------------------------"
+echo -e "\nApplying segmentation for $sub\n"
+echo "-------------------------------------------"
+
+matlab -batch "addpath('${CODEDIR}'); addpath(genpath('${APPDIR}')); [bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); PROC_segmentation(anat,'${SUBBIDS}/anat','${APPDIR}/spm', '${PROCDIR}'); exit"
+
+# 8) NORMALIZATION
+
+echo "-------------------------------------------"
+echo -e "\nApplying normalization for $sub\n"
+echo "-------------------------------------------"
+
+matlab -batch "addpath('${CODEDIR}'); addpath(genpath('${APPDIR}')); [bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); PROC_normalization(bold,'bold',anat,'${PROCDIR}','${PROCDIR}','creg-','normal-'); PROC_normalization(vaso,'vaso',anat,'${PROCDIR}','${PROCDIR}','creg-','normal-'); exit"
+
+rename 'normal-creg-' 'normal-' *
+
+# 9) SMOOTHING
+
+echo "-------------------------------------------"
+echo -e "\nApplying smoothing for $sub\n"
+echo "-------------------------------------------"
+
+matlab -batch "addpath('${CODEDIR}'); addpath(genpath('${APPDIR}')); [bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); PROC_smoothing(bold,'bold','${PROCDIR}','normal-','PROC-'); PROC_smoothing(vaso,'vaso','${PROCDIR}','normal-','PROC-'); exit"
+
+rename 'PROC-normal-' 'PROC-' *
+
+echo "************************************"
+echo "COMPLETED PREPROCESSING PHASE 2!"
 echo "************************************"
