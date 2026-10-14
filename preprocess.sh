@@ -54,8 +54,8 @@ fi
 
 # identifying target scans
 cd "${SUBBIDS}/func"
-vaso=$(find -name "*vaso.nii" -printf "%P\n")
-bold=$(find -name "*bold.nii" -printf "%P\n")
+vaso=$(find -maxdepth 1 -name "*vaso.nii" -printf "%P\n")
+bold=$(find -maxdepth 1 -name "*bold.nii" -printf "%P\n")
 echo -e "Vaso scans are $vaso\n"
 echo -e "Bold scans are $bold\n"
 
@@ -70,7 +70,7 @@ anat_tags=("UNIT1" "T1map" "INV1" "INV2")
 cd "${SUBBIDS}/anat"
 
 for tag in "${anat_tags[@]}"; do
-	scan=$(find -name "sub-*${tag}.nii")
+	scan=$(find -maxdepth 1 -name "sub-*${tag}.nii" -printf "%P")
 	echo -e "Found scan for ${tag} as ${scan}\n"
 	if [ -f "${SUBBIDS}/anat/original-${scan}" ]; then
 		echo -e "Skipping: File ${scan} already defaced.\n"
@@ -79,7 +79,7 @@ for tag in "${anat_tags[@]}"; do
 		pydeface $scan
 		echo -e "Renaming defaced scan\n"
 		mv -v $scan "original-${scan}"
-		defaced=$(find -name "*defaced.nii")
+		defaced=$(find -maxdepth 1 -name "*defaced.nii" -printf "%P")
 		mv -v $defaced $scan
 	fi
 done
@@ -166,9 +166,9 @@ echo "-------------------------------------------"
 matlab -batch "addpath('${CODEDIR}'); addpath(genpath('${APPDIR}')); [bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); PROC_segmentation(anat,'${SUBBIDS}/anat','${APPDIR}/spm', '${PROCDIR}'); exit"
 
 # moving outputs to processing folder
-mv -v "${SUBBIDS}/anat/c?sub*nii" "${PROCDIR}"
-mv -v "${SUBBIDS}/anat/y_*nii" "${PROCDIR}"
-mv -v "${SUBBIDS}/anat/msub*nii" "${PROCDIR}"
+mv -v ${SUBBIDS}/anat/c?sub*nii "${PROCDIR}"
+mv -v ${SUBBIDS}/anat/y_*nii "${PROCDIR}"
+mv -v ${SUBBIDS}/anat/msub*nii "${PROCDIR}"
 
 # 8) NORMALIZATION
 
