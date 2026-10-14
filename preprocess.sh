@@ -70,7 +70,7 @@ anat_tags=("UNIT1" "T1map" "INV1" "INV2")
 cd "${SUBBIDS}/anat"
 
 for tag in "${anat_tags[@]}"; do
-	scan=$(find -maxdepth 1 -name "sub-*${tag}.nii" -printf "%P")
+	scan="sub-${sub}_acq-mp2rage_${tag}.nii"
 	echo -e "Found scan for ${tag} as ${scan}\n"
 	if [ -f "${SUBBIDS}/anat/original-${scan}" ]; then
 		echo -e "Skipping: File ${scan} already defaced.\n"
@@ -79,7 +79,7 @@ for tag in "${anat_tags[@]}"; do
 		pydeface $scan
 		echo -e "Renaming defaced scan\n"
 		mv -v $scan "original-${scan}"
-		defaced=$(find -maxdepth 1 -name "*defaced.nii" -printf "%P")
+		defaced="sub-${sub}_acq-mp2rage_${tag}_defaced.nii"
 		mv -v $defaced $scan
 	fi
 done
