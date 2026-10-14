@@ -70,7 +70,8 @@ anat_tags=("UNIT1" "T1map" "INV1" "INV2")
 cd "${SUBBIDS}/anat"
 
 for tag in "${anat_tags[@]}"; do
-	scan=$(find -name "sub-*${tag}.nii" -printf "%P\n")
+	scan=$(find -name "sub-*${tag}.nii")
+	echo -e "Found scan for ${tag} as ${scan}\n"
 	if [ -f "${SUBBIDS}/anat/original-${scan}" ]; then
 		echo -e "Skipping: File ${scan} already defaced.\n"
 	else
@@ -78,8 +79,8 @@ for tag in "${anat_tags[@]}"; do
 		pydeface $scan
 		echo -e "Renaming defaced scan\n"
 		mv -v $scan "original-${scan}"
-		nodeface=$(find -name "*defaced.nii" -printf "%P\n")
-		mv -v $nodeface $scan
+		defaced=$(find -name "*defaced.nii")
+		mv -v $defaced $scan
 	fi
 done
 
@@ -163,6 +164,11 @@ echo -e "\nApplying segmentation for $sub\n"
 echo "-------------------------------------------"
 
 matlab -batch "addpath('${CODEDIR}'); addpath(genpath('${APPDIR}')); [bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); PROC_segmentation(anat,'${SUBBIDS}/anat','${APPDIR}/spm', '${PROCDIR}'); exit"
+
+# moving outputs to processing folder
+mv -v "${SUBBIDS}/anat/c?sub*nii" "${PROCDIR}"
+mv -v "${SUBBIDS}/anat/y_*nii" "${PROCDIR}"
+mv -v "${SUBBIDS}/anat/msub*nii" "${PROCDIR}"
 
 # 8) NORMALIZATION
 

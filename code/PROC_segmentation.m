@@ -58,7 +58,7 @@ matlabbatch{i}.spm.spatial.preproc.warp.bb = [NaN NaN NaN
 spm_jobman('run',matlabbatch) % execute the batch
 clear matlabbatch % clear matlabbatch
 
-fprintf("SEGMENTATION COMPLETED")
+fprintf("SEGMENTATION COMPLETED\n")
 out = 0;
 
 end
