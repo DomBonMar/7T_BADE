@@ -70,8 +70,8 @@ anat_tags=("UNIT1" "T1map" "INV1" "INV2")
 cd "${SUBBIDS}/anat"
 
 for tag in "${anat_tags[@]}"; do
-	scan=$(find -name "*${tag}.nii" -printf "%P\n")
-	if [ -f ${SUBBIDS}/anat/original-${scan} ]; then
+	scan=$(find -name "sub-*${tag}.nii" -printf "%P\n")
+	if [ -f "${SUBBIDS}/anat/original-${scan}" ]; then
 		echo -e "Skipping: File ${scan} already defaced.\n"
 	else
 		echo -e "Defacing $tag scan for $sub\n"
