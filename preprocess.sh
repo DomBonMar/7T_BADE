@@ -69,24 +69,19 @@ anat_tags=("UNIT1" "T1map" "INV1" "INV2")
 
 cd "${SUBBIDS}/anat"
 
-orig=$( original*.nii  )
-if [ ${#orig[@]} -ge ${NUM_ANAT} ]; then
-
-	echo -e "Defacing already completed for $sub\n"
-
-else
-
-	for tag in "${anat_tags[@]}"; do
+for tag in "${anat_tags[@]}"; do
+	scan=$(find -name "*${tag}.nii" -printf "%P\n")
+	if [ -f ${SUBBIDS}/anat/original-${scan} ]; then
+		echo -e "Skipping: File ${scan} already defaced.\n"
+	else
 		echo -e "Defacing $tag scan for $sub\n"
-		scan=$(find -name "*${tag}.nii" -printf "%P\n")
 		pydeface $scan
-
 		echo -e "Renaming defaced scan\n"
 		mv -v $scan "original-${scan}"
 		nodeface=$(find -name "*defaced.nii" -printf "%P\n")
 		mv -v $nodeface $scan
-	done
-fi
+	fi
+done
 
 # 3) NORDIC DENOISING
 

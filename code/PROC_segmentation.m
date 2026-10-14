@@ -15,7 +15,7 @@ anatfile = compose("%s/%s",ANATDIR,anat_img);
 i=1;
 
 % anat scans per run
-matlabbatch{i}.spm.spatial.preproc.channel.vols = {anatfile};
+matlabbatch{i}.spm.spatial.preproc.channel.vols = cellstr(anatfile);
 matlabbatch{i}.spm.spatial.preproc.channel.biasreg = 0.0001;
 matlabbatch{i}.spm.spatial.preproc.channel.biasfwhm = 60;
 matlabbatch{i}.spm.spatial.preproc.channel.write = [0 1];

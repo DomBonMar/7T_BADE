@@ -24,7 +24,10 @@ for r = 1:length(runs)
 
 end
 
-matlabbatch{1}.spm.spatial.smooth.data = cellstr(run_array);
+run_array = cellstr(run_array);
+run_array = run_array(:); % convert to column cellstr
+
+matlabbatch{1}.spm.spatial.smooth.data = run_array;
 matlabbatch{1}.spm.spatial.smooth.fwhm = [2 2 2];
 matlabbatch{1}.spm.spatial.smooth.dtype = 0;
 matlabbatch{1}.spm.spatial.smooth.im = 0;

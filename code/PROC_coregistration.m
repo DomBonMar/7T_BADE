@@ -16,7 +16,7 @@ fprintf("Running coregistration on %s runs\n",runtype)
 anatfile = compose("%s/%s",ANATDIR,anat_img);
 
 % preparing batch
-for i = 1:length(runs)
+for r = 1:length(runs)
 
     % checks if output already generated
     if isfile(compose("%s/%s%s",FUNCDIR,PREFIX,runs(r)))
@@ -30,20 +30,20 @@ for i = 1:length(runs)
     meanfile = compose("%s/mean-%s",FUNCDIR,runs(r));
 
     % fixed image [anat image]
-    matlabbatch{c}.spm.spatial.coreg.estwrite.ref = cellstr(anatfile);
+    matlabbatch{r}.spm.spatial.coreg.estwrite.ref = cellstr(anatfile);
     % moved image [mean image]
-    matlabbatch{c}.spm.spatial.coreg.estwrite.source = cellstr(meanfile);
+    matlabbatch{r}.spm.spatial.coreg.estwrite.source = cellstr(meanfile);
     % other images [func scan as expanded img]
-    matlabbatch{c}.spm.spatial.coreg.estwrite.other = cellstr(spm_select('expand', run));
+    matlabbatch{r}.spm.spatial.coreg.estwrite.other = cellstr(spm_select('expand', run));
     
-    matlabbatch{c}.spm.spatial.coreg.estwrite.eoptions.cost_fun = 'ncc';
-    matlabbatch{c}.spm.spatial.coreg.estwrite.eoptions.sep = [4 2];
-    matlabbatch{c}.spm.spatial.coreg.estwrite.eoptions.tol = [0.02 0.02 0.02 0.001 0.001 0.001 0.01 0.01 0.01 0.001 0.001 0.001];
-    matlabbatch{c}.spm.spatial.coreg.estwrite.eoptions.fwhm = [7 7];
-    matlabbatch{c}.spm.spatial.coreg.estwrite.roptions.wrap     = [0 0 0];
-    matlabbatch{c}.spm.spatial.coreg.estwrite.roptions.mask     = 0;
-    matlabbatch{c}.spm.spatial.coreg.estwrite.roptions.interp = 4;
-    matlabbatch{c}.spm.spatial.coreg.estwrite.roptions.prefix = PREFIX;
+    matlabbatch{r}.spm.spatial.coreg.estwrite.eoptions.cost_fun = 'ncc';
+    matlabbatch{r}.spm.spatial.coreg.estwrite.eoptions.sep = [4 2];
+    matlabbatch{r}.spm.spatial.coreg.estwrite.eoptions.tol = [0.02 0.02 0.02 0.001 0.001 0.001 0.01 0.01 0.01 0.001 0.001 0.001];
+    matlabbatch{r}.spm.spatial.coreg.estwrite.eoptions.fwhm = [7 7];
+    matlabbatch{r}.spm.spatial.coreg.estwrite.roptions.wrap     = [0 0 0];
+    matlabbatch{r}.spm.spatial.coreg.estwrite.roptions.mask     = 0;
+    matlabbatch{r}.spm.spatial.coreg.estwrite.roptions.interp = 4;
+    matlabbatch{r}.spm.spatial.coreg.estwrite.roptions.prefix = PREFIX;
 
 end
 
