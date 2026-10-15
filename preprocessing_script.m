@@ -1,5 +1,6 @@
 % 7T fMRI - Preprocessing Script
 % By domenico
+% VERSION USED DURING SUMMER 2026
 
 %% 0.1) SCAN INFO AND METADATA
 

@@ -8,6 +8,8 @@ mkdir -p data/dicom
 mkdir -p data/bids
 mkdir -p data/processed
 mkdir -p data/bade_fmri_task
+mkdir -p output/functional
+mkdir -p output/layer
 mkdir software
 
 # prepare virtual env for dcm2bids

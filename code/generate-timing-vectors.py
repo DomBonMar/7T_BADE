@@ -1,7 +1,7 @@
 # usage via command line
 # python bade-fmri_timing-vectors.py {SUB-ID}
 
-# OUTPUT: {SUB}_bade-fmri_timing_vectors.mat
+# OUTPUT: sub-{SUB}_bade-fmri_timing-vectors.mat
 
 import pandas as pd
 import numpy as np
@@ -14,7 +14,7 @@ import json
 SUB = sys.argv[1]
 DATADIR = "/data/lavlab/layer-7t-predictive-coding/data"
 BADEDIR = Path(f"{DATADIR}/bade_fmri_task")
-SPMDIR = f"{DATADIR}/mri/spm"
+OUTDIR = f"{DATADIR}/bade_fmri_task"
 
 # task metadata
 N_RUNS = 3
@@ -66,9 +66,9 @@ for run in range(1,N_RUNS+1):
     OUTDICT[line] = timings.tolist()
 
 # saves directly in matlab format
-OUTFILE = f"{SPMDIR}/{SUB}/bade-info/{SUB}_bade-fmri_timing_vectors.mat"
+OUTFILE = f"{OUTDIR}/sub-{SUB}_bade-fmri_timing-vectors.mat"
 io.savemat(OUTFILE,OUTDICT)
 
 # saving json file too
-with open(f"{SPMDIR}/{SUB}/bade-info/{SUB}_bade-fmri_timing-vectors.json", "w") as f:
+with open(f"{OUTDIR}/sub-{SUB}_bade-fmri_timing-vectors.json", "w") as f:
     json.dump(OUTDICT, f)
