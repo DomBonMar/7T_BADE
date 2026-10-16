@@ -13,7 +13,7 @@ from pathlib import Path
 # scan metadata
 SUB = sys.argv[1]
 BASEDIR = Path.cwd()
-BADEDIR = Path(f"{BADEDIR}/data/bade_fmri_task")
+BADEDIR = Path(f"{BASEDIR}/data/bade_fmri_task")
 OUTDIR = BADEDIR
 
 # task metadata
