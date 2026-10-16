@@ -70,8 +70,7 @@ matlabbatch{1}.spm.stats.fmri_spec.mthresh = 0.8;
 matlabbatch{1}.spm.stats.fmri_spec.mask = {''};
 matlabbatch{1}.spm.stats.fmri_spec.cvi = 'AR(1)';
 
-cd(FLADIR)
-save 1_first-level matlabbatch
+cd(OUTDIR)
 spm_jobman('run',matlabbatch) % execute the batch
 clear matlabbatch % clear matlabbatch
 
