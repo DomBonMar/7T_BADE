@@ -3,7 +3,7 @@
 #SBATCH --output=logs/%x_%j.out
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=16
-#SBATCH --time=2:00:00
+#SBATCH --time=0:20:00
 #SBATCH --mem-per-cpu=10000
 
 ANALYSIS_TYPE="functional"
@@ -128,6 +128,8 @@ matlab -batch " \
 
 for runtype in ${RUNTYPES[@]}; do
 
+	echo -e "Upsampling images of type ${runtype}\n"
+
 	updir="${OUTDIR}/fla-${runtype}"
 	cd "${updir}"
 	for (( i=1; i<=${N_CONTRASTS}; i++ )); do
@@ -139,10 +141,13 @@ for runtype in ${RUNTYPES[@]}; do
 		fi
 	done
 
-	t1like="sub-${sub}_t1-like_${runtype}.nii"
-	if [ ! -f "${updir}/Up_${t1like}" ]; then
-		echo -e "Upsampling t1-like image\n"
-		3dresample -input "${PROCDIR}/${t1like}" -prefix "${updir}/Up_${t1like}" -dxyz $dx $dy $dz -overwrite
+	# for layer analysis
+	if [[ "${ANALYSIS_TYPE}" == "layer"  ]]; then
+		t1like="sub-${sub}_t1-like_${runtype}.nii"
+		if [ ! -f "${updir}/Up_${t1like}" ]; then
+			echo -e "Upsampling t1-like image\n"
+			3dresample -input "${PROCDIR}/${t1like}" -prefix "${updir}/Up_${t1like}" -dxyz $dx $dy $dz -overwrite
+		fi
 	fi
 done
 
