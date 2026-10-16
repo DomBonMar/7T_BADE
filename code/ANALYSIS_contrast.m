@@ -21,7 +21,7 @@ end
 matlabbatch{1}.spm.stats.con.spmmat = cellstr(compose("%s/SPM.mat",OUTDIR));
 
 % adds one array per contrast
-for c = 1:length(CONTRASTS)
+for c = 1:length(LABELS)
     matlabbatch{1}.spm.stats.con.consess{c}.tcon.name = LABELS{c};
     matlabbatch{1}.spm.stats.con.consess{c}.tcon.weights = CONTRASTS(c,:);
     matlabbatch{1}.spm.stats.con.consess{c}.tcon.sessrep = 'none';

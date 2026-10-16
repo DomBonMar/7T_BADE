@@ -44,7 +44,7 @@ for r = 1:length(runs)
     for c = 1:length(CONDITIONS)
 
         % adds timing data per condition
-        idx_label = compose("%s_run%d_%s",sub,r,CONDITIONS(c));
+        idx_label = compose("%s_run%d_%s",sub,r,CONDITIONS{c});
         
         matlabbatch{1}.spm.stats.fmri_spec.sess(r).cond(c).name = char(CONDITIONS{c});
         matlabbatch{1}.spm.stats.fmri_spec.sess(r).cond(c).onset = timings.(idx_label);
