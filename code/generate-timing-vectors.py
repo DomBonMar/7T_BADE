@@ -12,9 +12,9 @@ from pathlib import Path
 
 # scan metadata
 SUB = sys.argv[1]
-DATADIR = "/data/lavlab/layer-7t-predictive-coding/data"
-BADEDIR = Path(f"{DATADIR}/bade_fmri_task")
-OUTDIR = f"{DATADIR}/bade_fmri_task"
+BASEDIR = Path.cwd()
+BADEDIR = Path(f"{BADEDIR}/data/bade_fmri_task")
+OUTDIR = BADEDIR
 
 # task metadata
 N_RUNS = 3
