@@ -17,9 +17,6 @@ export APPDIR="${BASEDIR}/software"
 participant_file="${BIDSDIR}/participants.tsv"
 motion_file="${BIDSDIR}/motion.tsv"
 
-# adding software to path
-export PATH="${APPDIR}/LayNii:${PATH}"
-
 # getting subject info
 mapfile -t subs < $participant_file
 sub=${subs[$SLURM_ARRAY_TASK_ID]}
@@ -55,7 +52,7 @@ t1_like="${PROCDIR}/sub-${sub}_t1-like_run-0${target_run}.nii"
 t1_bold="${PROCDIR}/sub-${sub}_t1-like_bold.nii"
 t1_vaso="${PROCDIR}/sub-${sub}_t1-like_vaso.nii"
 
-3dcalc -a "${mean_bold}" -b "${mean_vaso}" -expr "(a+b)/(a-b)" -datum float -prefix "${t1_like}"
+3dcalc -a "${mean_bold}" -b "${mean_vaso}" -expr "(a+b)/(a-b)" -datum float -prefix "${t1_like}" -overwrite
 
 echo "Making copies of t1-like"
 cp -v "${t1_like}" "${t1_bold}"
@@ -67,13 +64,13 @@ echo "-------------------------------------------"
 echo -e "\nApplying functional registration for $sub\n"
 echo "-------------------------------------------"
 
-matlab -batch "
-	addpath('${CODEDIR}');
-	addpath(genpath('${APPDIR}'));
-	[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}');
-	REG_coregistration(bold,'bold','${mean_bold}', '${t1_bold}', '${PROCDIR}', 'moco-', 'reg-');
-	REG_coregistration(vaso,'vaso','${mean_vaso}', '${t1_vaso}', '${PROCDIR}', 'moco-', 'reg-');
-	exit
+matlab -batch " \
+	addpath('${CODEDIR}'); \
+	addpath(genpath('${APPDIR}')); \
+	[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); \
+	REG_coregistration(bold,'bold','${mean_bold}', '${t1_bold}', '${PROCDIR}', 'moco-', 'reg-'); \
+	REG_coregistration(vaso,'vaso','${mean_vaso}', '${t1_vaso}', '${PROCDIR}', 'moco-', 'reg-'); \
+	exit \
 "
 
 echo -e "Renaming registered files\n"
@@ -84,13 +81,13 @@ rename "reg-moco-" "reg-" *
 target_bold="${PROCDIR}/reg-sub-${sub}_task-bade_run-0${target_run}_bold.nii"
 target_vaso="${PROCDIR}/reg-sub-${sub}_task-bade_run-0${target_run}_vaso.nii"
 
-matlab -batch "
-	addpath('${CODEDIR}');
-	addpath(genpath('${APPDIR}'));
-	[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}');
-	REG_alignment(bold,'bold', '${target_bold}', '${t1_bold}', '${PROCDIR}', 'reg-', 'REG-');
-	REG_alignment(vaso,'vaso', '${target_vaso}', '${t1_vaso}', '${PROCDIR}', 'reg-', 'REG-');
-	exit
+matlab -batch " \
+	addpath('${CODEDIR}'); \
+	addpath(genpath('${APPDIR}')); \
+	[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); \
+	REG_alignment(bold,'bold', '${target_bold}', '${t1_bold}', '${PROCDIR}', 'reg-', 'REG-'); \
+	REG_alignment(vaso,'vaso', '${target_vaso}', '${t1_vaso}', '${PROCDIR}', 'reg-', 'REG-'); \
+	exit \
 "
 
 echo "************************************"
