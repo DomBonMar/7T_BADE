@@ -69,16 +69,48 @@ echo -e "Vaso scans are $vaso\n"
 echo -e "Bold scans are $bold\n"
 
 cd "${OUTDIR}"
+
+if [ -f "${OUTDIR}/fla-bold/SPM.mat"  ]; then
+	echo -e "First-level analysis already processed for bold\n"
+else
+	echo -e "Computing bold first-level analysis...\n"
+	matlab -batch " \
+		addpath('${CODEDIR}'); \
+		addpath(genpath('${APPDIR}')); \
+		[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); \
+		ANALYSIS_first_level('${sub}',bold,'bold','${TR}','${condition_file}','${PROCDIR}','${PREFIX}', '${timing_file}','${OUTDIR}/fla-bold'); \
+		exit \
+	"
+fi
+
+if [ -f "${OUTDIR}/fla-vaso/SPM.mat"  ]; then
+	echo -e "First-level analysis already processed for vaso\n"
+else
+	echo -e "Computing vaso first-level analysis...\n"
+	matlab -batch " \
+		addpath('${CODEDIR}'); \
+		addpath(genpath('${APPDIR}')); \
+		[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); \
+		ANALYSIS_first_level('${sub}',vaso,'vaso','${TR}','${condition_file}','${PROCDIR}','${PREFIX}', '${timing_file}','${OUTDIR}/fla-vaso'); \
+		exit \
+	"
+fi
+
+# 2) MODEL ESTIMATION
+
+echo "-------------------------------------------"
+echo -e "\nEstimating model for $sub\n"
+echo "-------------------------------------------"
+
 matlab -batch " \
 	addpath('${CODEDIR}'); \
 	addpath(genpath('${APPDIR}')); \
-	[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); \
-	ANALYSIS_first_level('${sub}',bold,'bold','${TR}','${condition_file}','${PROCDIR}','${PREFIX}', '${timing_file}','${OUTDIR}/fla-bold'); \
-	ANALYSIS_first_level('${sub}',vaso,'vaso','${TR}','${condition_file}','${PROCDIR}','${PREFIX}', '${timing_file}','${OUTDIR}/fla-vaso'); \
+	ANALYSIS_estimation('bold','${OUTDIR}/fla-bold'); \
+	ANALYSIS_estimation('vaso','${OUTDIR}/fla-vaso'); \
 	exit \
 "
 
-# 2) CONTRAST ANALYSIS
+# 3) CONTRAST ANALYSIS
 
 echo "-------------------------------------------"
 echo -e "\nExtracting contrasts for $sub\n"
@@ -87,13 +119,12 @@ echo "-------------------------------------------"
 matlab -batch " \
 	addpath('${CODEDIR}'); \
 	addpath(genpath('${APPDIR}')); \
-	[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); \
 	ANALYSIS_contrast('bold','${contrast_file}','${OUTDIR}/fla-bold'); \
 	ANALYSIS_contrast('vaso','${contrast_file}','${OUTDIR}/fla-vaso'); \
 	exit \
 "
 
-# 3) UPSAMPLING IMAGES
+# 4) UPSAMPLING IMAGES
 
 for runtype in ${RUNTYPES[@]}; do
 
@@ -101,14 +132,18 @@ for runtype in ${RUNTYPES[@]}; do
 	cd "${updir}"
 	for (( i=1; i<=${N_CONTRASTS}; i++ )); do
 		img="spmT_000${i}.nii"
-		echo -e "Upsampling contrast image ${img}\n"
-		3dresample -input "${updir}/${img}" -prefix "${updir}/Up_${img}" -dxyz $dx $dy $dz -overwrite
+		up_img="Up_${img}"
+		if [ ! -f "${updir}${up_img}" ]; then
+			echo -e "Upsampling contrast image ${img}\n"
+			3dresample -input "${updir}/${img}" -prefix "${updir}/Up_${img}" -dxyz $dx $dy $dz -overwrite
+		fi
 	done
 
 	t1like="sub-${sub}_t1-like_${runtype}.nii"
-	echo -e "Upsampling t1-like image\n"
-	3dresample -input "${PROCDIR}/${t1like}" -prefix "${updir}/Up_${t1like}" -dxyz $dx $dy $dz -overwrite
-
+	if [ ! -f "${updir}/Up_${t1like}" ]; then
+		echo -e "Upsampling t1-like image\n"
+		3dresample -input "${PROCDIR}/${t1like}" -prefix "${updir}/Up_${t1like}" -dxyz $dx $dy $dz -overwrite
+	fi
 done
 
 echo "*************************************"
