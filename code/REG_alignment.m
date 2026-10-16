@@ -16,7 +16,7 @@ for r = 1:length(runs)
     % creates copy of run => might need to skip this entirely
     run = compose("%s/%s%s",FUNCDIR,INFIX,runs(r));
     outname = compose("%s/%s%s",FUNCDIR,PREFIX,runs(r));
-    system(sprintf('cp -v %s %s',run,outname))
+    system(sprintf('cp -v %s %s',run,outname)) % make raw copy
 
     % skip target file
     if run == target_run
@@ -25,7 +25,7 @@ for r = 1:length(runs)
 
     % shift alignment to match target
     fprintf('Aligning %s run %s as %s\n',runtype,run,outname)
-    V = spm_vol(run);
+    V = spm_vol(outname);
     for n = 1:numel(V)
         spm_get_space(sprintf('%s,%d',outname,n), M);   
     end
