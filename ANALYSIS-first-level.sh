@@ -69,14 +69,14 @@ echo -e "Vaso scans are $vaso\n"
 echo -e "Bold scans are $bold\n"
 
 cd "${OUTDIR}"
-matlab -nojvm -nodesktop -nosplash << 'EOF'
-	addpath('${CODEDIR}');
-	addpath(genpath('${APPDIR}'));
-	[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}');
-	ANALYSIS_first_level('${sub}',bold,'bold','${TR}','${condition_file}','${PROCDIR}','${PREFIX}', '${timing_file}','${OUTDIR}/fla-bold');
-	ANALYSIS_first_level('${sub}',vaso,'vaso','${TR}','${condition_file}','${PROCDIR}','${PREFIX}', '${timing_file}','${OUTDIR}/fla-vaso');
-	exit
-EOF
+matlab -batch " \
+	addpath('${CODEDIR}'); \
+	addpath(genpath('${APPDIR}')); \
+	[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); \
+	ANALYSIS_first_level('${sub}',bold,'bold','${TR}','${condition_file}','${PROCDIR}','${PREFIX}', '${timing_file}','${OUTDIR}/fla-bold'); \
+	ANALYSIS_first_level('${sub}',vaso,'vaso','${TR}','${condition_file}','${PROCDIR}','${PREFIX}', '${timing_file}','${OUTDIR}/fla-vaso'); \
+	exit \
+"
 
 # 2) CONTRAST ANALYSIS
 
@@ -84,14 +84,14 @@ echo "-------------------------------------------"
 echo -e "\nExtracting contrasts for $sub\n"
 echo "-------------------------------------------"
 
-matlab -nojvm -nodesktop -nosplash << 'EOF'
-	addpath('${CODEDIR}');
-	addpath(genpath('${APPDIR}'));
-	[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}');
-	ANALYSIS_contrast('bold','${contrast_file}','${OUTDIR}/fla-bold');
-	ANALYSIS_contrast('vaso','${contrast_file}','${OUTDIR}/fla-vaso');
-	exit
-EOF
+matlab -batch " \
+	addpath('${CODEDIR}'); \
+	addpath(genpath('${APPDIR}')); \
+	[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); \
+	ANALYSIS_contrast('bold','${contrast_file}','${OUTDIR}/fla-bold'); \
+	ANALYSIS_contrast('vaso','${contrast_file}','${OUTDIR}/fla-vaso'); \
+	exit \
+"
 
 # 3) UPSAMPLING IMAGES
 
