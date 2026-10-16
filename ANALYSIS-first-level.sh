@@ -69,7 +69,7 @@ echo -e "Vaso scans are $vaso\n"
 echo -e "Bold scans are $bold\n"
 
 cd "${OUTDIR}"
-matlab -batch "run" << 'EOF'
+matlab -nojvm -nodesktop -nosplash << 'EOF'
 	addpath('${CODEDIR}');
 	addpath(genpath('${APPDIR}'));
 	[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}');
@@ -84,7 +84,7 @@ echo "-------------------------------------------"
 echo -e "\nExtracting contrasts for $sub\n"
 echo "-------------------------------------------"
 
-matlab -batch "run" << 'EOF'
+matlab -nojvm -nodesktop -nosplash << 'EOF'
 	addpath('${CODEDIR}');
 	addpath(genpath('${APPDIR}'));
 	[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}');
