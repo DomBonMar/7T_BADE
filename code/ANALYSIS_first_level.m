@@ -36,7 +36,7 @@ for r = 1:length(runs)
 
     % locates run file info
     run = compose("%s/%s%s",INDIR,INFIX,runs(r));
-    [~,run_stem,~] = fileparts(run);
+    [~,run_stem,~] = fileparts(runs(r));
     moco_file = sprintf('%s/rp_%s.txt',INDIR,run_stem);
 
     matlabbatch{1}.spm.stats.fmri_spec.sess(r).scans = cellstr(run);

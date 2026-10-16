@@ -7,7 +7,7 @@
 #SBATCH --mem-per-cpu=10000
 
 ANALYSIS_TYPE="functional"
-PREFIX="REG-"
+PREFIX="PROC-"
 RUNTYPES=("bold" "vaso")
 dx=4
 dy=1
