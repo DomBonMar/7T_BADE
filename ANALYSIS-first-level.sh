@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=PREPROC
+#SBATCH --job-name=FLA
 #SBATCH --output=logs/%x_%j.out
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=16
@@ -22,7 +22,7 @@ export CODEDIR="${BASEDIR}/code"
 export APPDIR="${BASEDIR}/software"
 
 participant_file="${BIDSDIR}/participants.tsv"
-scan_file="${BIDSDIR}/scaninfo-file.tsv"
+scan_file="${BADEDIR}/scaninfo-file.tsv"
 condition_file="${BADEDIR}/condition-info.csv"
 contrast_file="${BADEDIR}/contrast-info.csv"
 

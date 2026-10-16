@@ -8,7 +8,7 @@ import numpy as np
 import sys
 from scipy import io
 from pathlib import Path
-import json
+#import json
 
 # scan metadata
 SUB = sys.argv[1]
@@ -70,5 +70,5 @@ OUTFILE = f"{OUTDIR}/sub-{SUB}_bade-fmri_timing-vectors.mat"
 io.savemat(OUTFILE,OUTDICT)
 
 # saving json file too
-with open(f"{OUTDIR}/sub-{SUB}_bade-fmri_timing-vectors.json", "w") as f:
-    json.dump(OUTDICT, f)
+#with open(f"{OUTDIR}/sub-{SUB}_bade-fmri_timing-vectors.json", "w") as f:
+#    json.dump(OUTDICT, f)
