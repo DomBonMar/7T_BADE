@@ -19,10 +19,10 @@ anatfile = compose("%s/%s",ANATDIR,anat_img);
 for r = 1:length(runs)
 
     % checks if output already generated
-    if isfile(compose("%s/%s%s",FUNCDIR,PREFIX,runs(r)))
-	    fprintf('Skipping: file %s already computed.\n',runs(r))
-	    continue;
-    end
+    %if isfile(compose("%s/%s%s",FUNCDIR,PREFIX,runs(r)))
+	%    fprintf('Skipping: file %s already computed.\n',runs(r))
+	%    continue;
+    %end
 
     % else >> adds to batch
     n_runs = n_runs + 1;
@@ -30,20 +30,17 @@ for r = 1:length(runs)
     meanfile = compose("%s/mean-%s",FUNCDIR,runs(r));
 
     % fixed image [anat image]
-    matlabbatch{r}.spm.spatial.coreg.estwrite.ref = cellstr(anatfile);
+    matlabbatch{r}.spm.spatial.coreg.estimate.ref = cellstr(anatfile);
     % moved image [mean image]
-    matlabbatch{r}.spm.spatial.coreg.estwrite.source = cellstr(meanfile);
+    matlabbatch{r}.spm.spatial.coreg.estimate.source = cellstr(meanfile);
     % other images [func scan as expanded img]
-    matlabbatch{r}.spm.spatial.coreg.estwrite.other = cellstr(spm_select('expand', run));
+    matlabbatch{r}.spm.spatial.coreg.estimate.other = cellstr(spm_select('expand', run));
     
-    matlabbatch{r}.spm.spatial.coreg.estwrite.eoptions.cost_fun = 'ncc';
-    matlabbatch{r}.spm.spatial.coreg.estwrite.eoptions.sep = [4 2];
-    matlabbatch{r}.spm.spatial.coreg.estwrite.eoptions.tol = [0.02 0.02 0.02 0.001 0.001 0.001 0.01 0.01 0.01 0.001 0.001 0.001];
-    matlabbatch{r}.spm.spatial.coreg.estwrite.eoptions.fwhm = [7 7];
-    matlabbatch{r}.spm.spatial.coreg.estwrite.roptions.wrap     = [0 0 0];
-    matlabbatch{r}.spm.spatial.coreg.estwrite.roptions.mask     = 0;
-    matlabbatch{r}.spm.spatial.coreg.estwrite.roptions.interp = 4;
-    matlabbatch{r}.spm.spatial.coreg.estwrite.roptions.prefix = PREFIX;
+    matlabbatch{r}.spm.spatial.coreg.estimate.eoptions.cost_fun = 'ncc';
+    matlabbatch{r}.spm.spatial.coreg.estimate.eoptions.sep = [4 2];
+    matlabbatch{r}.spm.spatial.coreg.estimate.eoptions.tol = [0.02 0.02 0.02 0.001 0.001 0.001 0.01 0.01 0.01 0.001 0.001 0.001];
+    matlabbatch{r}.spm.spatial.coreg.estimate.eoptions.fwhm = [7 7];
+    % matlabbatch{r}.spm.spatial.coreg.estwrite.roptions.prefix = PREFIX;
 
 end
 

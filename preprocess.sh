@@ -93,12 +93,14 @@ echo "-------------------------------------------"
 
 rename '.nii.nii' '.nii' *
 
+PREFIX_NORD="nord-"
+
 matlab -batch " \
 	addpath('${CODEDIR}'); \
 	addpath(genpath('${APPDIR}')); \
 	[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); \
-	PROC_nordic_denoising('0', bold, 'bold', '${SUBBIDS}/func', '${PROCDIR}', '', 'nord-'); \
-	PROC_nordic_denoising('0', vaso, 'vaso', '${SUBBIDS}/func', '${PROCDIR}', '', 'nord-'); \
+	PROC_nordic_denoising('0', bold, 'bold', '${SUBBIDS}/func', '${PROCDIR}', '', '${PREFIX_NORD}'); \
+	PROC_nordic_denoising('0', vaso, 'vaso', '${SUBBIDS}/func', '${PROCDIR}', '', '${PREFIX_NORD}'); \
 	exit \
 "
 
@@ -108,6 +110,8 @@ rename '.nii.nii' '.nii' *
 
 # 4) MOTION CORRECTION
 
+PREFIX_MOCO="moco-"
+
 echo "-------------------------------------------"
 echo -e "\nApplying motion correction to $sub\n"
 echo "-------------------------------------------"
@@ -116,15 +120,15 @@ matlab -batch " \
 	addpath('${CODEDIR}'); \
 	addpath(genpath('${APPDIR}')); \
 	[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); \
-	PROC_motion_correction(bold, 'bold', '${PROCDIR}', '${PROCDIR}', 'nord-', 'moco-'); \
-	PROC_motion_correction(vaso, 'vaso', '${PROCDIR}', '${PROCDIR}', 'nord-', 'moco-'); \
+	PROC_motion_correction(bold, 'bold', '${PROCDIR}', '${PROCDIR}', '${PREFIX_NORD}', '${PREFIX_MOCO}'); \
+	PROC_motion_correction(vaso, 'vaso', '${PROCDIR}', '${PROCDIR}', '${PREFIX_NORD}', '${PREFIX_MOCO}'); \
 	exit \
 "
 
 # Renaming files
 
 rename 'meannord-' 'mean-' *
-rename 'moco-nord-' 'moco-' *
+rename "${PREFIX_MOCO}${PREFIX_NORD}" "${PREFIX_MOCO}" *
 rename 'rp_nord-' 'rp_' *
 
 # 5) BOLD CORRECTION
@@ -144,10 +148,10 @@ for vasorun in $vaso; do
 	boldrun="${vasorun/vaso/bold}"
 
 	echo "Correcting run $vasorun"
-	LN_BOCO -Nulled "${PROCDIR}/moco-${vasorun}" -BOLD "${PROCDIR}/moco-${boldrun}"
+	LN_BOCO -Nulled "${PROCDIR}/${PREFIX_MOCO}${vasorun}" -BOLD "${PROCDIR}/${PREFIX_MOCO}${boldrun}"
 	echo "Renaming files..."
-	mv -v "${PROCDIR}/moco-${vasorun}" "${PROCDIR}/noboco-${vasorun}"
-	mv -v "${PROCDIR}/VASO_LN.nii" "${PROCDIR}/moco-${vasorun}"
+	mv -v "${PROCDIR}/${PREFIX_MOCO}${vasorun}" "${PROCDIR}/noboco-${vasorun}"
+	mv -v "${PROCDIR}/VASO_LN.nii" "${PROCDIR}/${PREFIX_MOCO}${vasorun}"
 
 done
 
@@ -175,16 +179,18 @@ echo "-------------------------------------------"
 echo -e "\nApplying anat2func coregistration for $sub\n"
 echo "-------------------------------------------"
 
+PREFIX_COREG="creg-"
+
 matlab -batch " \
 	addpath('${CODEDIR}'); \
 	addpath(genpath('${APPDIR}')); \
 	[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); \
-	PROC_coregistration(bold,'bold',anat,'${PROCDIR}','${SUBBIDS}/anat','moco-','creg-'); \
-	PROC_coregistration(vaso,'vaso',anat,'${PROCDIR}','${SUBBIDS}/anat','moco-','creg-'); \
+	PROC_coregistration(bold,'bold',anat,'${PROCDIR}','${SUBBIDS}/anat','${PREFIX_MOCO}','${PREFIX_COREG}'); \
+	PROC_coregistration(vaso,'vaso',anat,'${PROCDIR}','${SUBBIDS}/anat','${PREFIX_MOCO}','${PREFIX_COREG}'); \
 	exit \
 "
 
-rename 'creg-moco-' 'creg-' *
+rename "${PREFIX_COREG}${PREFIX_MOCO}" "${PREFIX_COREG}" *
 
 # 7) SEGMENTATION
 
@@ -211,16 +217,18 @@ echo "-------------------------------------------"
 echo -e "\nApplying normalization for $sub\n"
 echo "-------------------------------------------"
 
+PREFIX_NORM="normal-"
+
 matlab -batch " \
 	addpath('${CODEDIR}'); \
 	addpath(genpath('${APPDIR}')); \
 	[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); \
-	PROC_normalization(bold,'bold',anat,'${PROCDIR}','${PROCDIR}','creg-','normal-'); \
-	PROC_normalization(vaso,'vaso',anat,'${PROCDIR}','${PROCDIR}','creg-','normal-'); \
+	PROC_normalization(bold,'bold',anat,'${PROCDIR}','${PROCDIR}','${PREFIX_COREG}','${PREFIX_NORM}'); \
+	PROC_normalization(vaso,'vaso',anat,'${PROCDIR}','${PROCDIR}','${PREFIX_COREG}','${PREFIX_NORM}'); \
 	exit \
 "
 
-rename 'normal-creg-' 'normal-' *
+rename "${PREFIX_NORM}${PREFIX_COREG}" "${PREFIX_NORM}" *
 
 # 9) SMOOTHING
 
@@ -228,16 +236,18 @@ echo "-------------------------------------------"
 echo -e "\nApplying smoothing for $sub\n"
 echo "-------------------------------------------"
 
+PREFIX_SMOOTH="PROC-"
+
 matlab -batch " \
 	addpath('${CODEDIR}'); \
 	addpath(genpath('${APPDIR}')); \
 	[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); \
-	PROC_smoothing(bold,'bold','${PROCDIR}','normal-','PROC-'); \
-	PROC_smoothing(vaso,'vaso','${PROCDIR}','normal-','PROC-'); \
+	PROC_smoothing(bold,'bold','${PROCDIR}','${PREFIX_NORM}','${PREFIX_SMOOTH}'); \
+	PROC_smoothing(vaso,'vaso','${PROCDIR}','${PREFIX_NORM}','${PREFIX_SMOOTH}'); \
 	exit \
 "
 
-rename 'PROC-normal-' 'PROC-' *
+rename "${PREFIX_SMOOTH}${PREFIX_NORM}" "${PREFIX_SMOOTH}" *
 
 echo "************************************"
 echo "COMPLETED PREPROCESSING PHASE 2!"
