@@ -1,7 +1,5 @@
 function out = PROC_motion_correction(runs,runtype,INDIR,OUTDIR,INFIX,PREFIX)
 
-% generates motion correction batch using SPM
-
 % runs >> array containing filenames of all functional runs
 
 out = 1;
@@ -48,7 +46,28 @@ if n_runs ~= 0
 end
 
 fprintf("MOTION CORRECTION COMPLETED for %s\n", runtype)
+
+% move images
+system(compose("rename '%s%s' '%s' * ",PREFIX,INFIX,PREFIX))
+
+% REALIGN IMAGES (nordic and moco)
+
+fprintf("Realigning %s runs...\n",runtype)
+for r = 1:length(runs)
+
+    % nordic alignment
+    run = compose("%s/%s%s",INDIR,PREFIX,runs(r));
+    target = compose("%s/%s%s",INDIR,INFIX,runs(r));
+    M = spm_get_space(target); % target alignment
     
+    % moco correction algnment
+    fprintf("Realigning %s run %s",runtype,run)
+    V = spm_vol(run);
+    for n = 1:numel(V)
+        spm_get_space(sprintf('%s,%d',run,n), M);   
+    end
+end
+
 out = 0;
 
 end
