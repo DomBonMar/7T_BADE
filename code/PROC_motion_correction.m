@@ -7,7 +7,7 @@ n_runs = 0;
 
 cd(OUTDIR)
 
-fprintf("Running on %s runs\n",runtype)
+fprintf("\nRunning on %s runs\n",runtype)
 
 % preparing batch
 for r = 1:length(runs)
@@ -58,13 +58,18 @@ for r = 1:length(runs)
     % nordic alignment
     run = sprintf('%s/%s%s',INDIR,PREFIX,runs(r));
     target = sprintf('%s/%s%s',INDIR,INFIX,runs(r));
-    M = spm_get_space(target); % target alignment
+
+    fprintf("Target aligned from NORDIC is:\n")
+    M = spm_get_space(target) % target alignment
     
     % moco correction algnment
-    fprintf("Realigning %s run %s",runtype,run)
-    V = spm_vol(run);
+    fprintf("MOCO alignment pre-adjustment is:\n")
+    V = spm_vol(run)
+
+    fprintf("Realigning %s run %s as %s\n",runtype,run,target)
     for n = 1:numel(V)
-        spm_get_space(sprintf('%s,%d',run,n), M);   
+        fprintf("Alignment for volume %d is:\n",n)
+        spm_get_space(sprintf('%s,%d',run,n), M)
     end
 end
 

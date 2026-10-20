@@ -18,13 +18,13 @@ for r = 1:length(runs)
 
     % else >> adds to batch
     n_runs = n_runs + 1;
-    warpfile = cellstr(compose("%s/y_%s",ANATDIR,anat_img));
-    run = cellstr(compose("%s/%s%s",FUNCDIR,INFIX,runs(r)));
+    warpfile = compose("%s/y_%s",ANATDIR,anat_img);
+    run = compose("%s/%s%s",FUNCDIR,INFIX,runs(r));
 
     % deformation field (y_ file)
-    matlabbatch{r}.spm.spatial.normalise.write.subj.def = warpfile;
+    matlabbatch{r}.spm.spatial.normalise.write.subj.def = cellstr(warpfile);
     % realigned func run
-    matlabbatch{r}.spm.spatial.normalise.write.subj.resample = run;
+    matlabbatch{r}.spm.spatial.normalise.write.subj.resample = cellstr(run);
     % other params
     matlabbatch{r}.spm.spatial.normalise.write.woptions.bb = [-78 -112 -70                                                        
         78 76 85];
