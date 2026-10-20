@@ -56,7 +56,7 @@ fprintf("Realigning %s runs...\n",runtype)
 for r = 1:length(runs)
 
     % nordic alignment
-    run = compose("%s/%s%s",INDIR,PREFIX,runs(r));
+    run = sprintf('%s/%s%s',INDIR,PREFIX,runs(r));
     target = sprintf('%s/%s%s',INDIR,INFIX,runs(r));
     M = spm_get_space(target); % target alignment
     
