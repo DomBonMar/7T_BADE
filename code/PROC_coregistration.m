@@ -1,4 +1,4 @@
-function out = PROC_coregistration(runs,runtype,anat_img,FUNCDIR,ANATDIR,INFIX,PREFIX)
+function out = PROC_coregistration(runs,runtype,anat_img,FUNCDIR,ANATDIR,INFIX)
 
 % generates coregistration batch using SPM
 
@@ -18,28 +18,26 @@ anatfile = compose("%s/%s",ANATDIR,anat_img);
 % preparing batch
 for r = 1:length(runs)
 
+    anatout = compose("%s/anat-%s",ANATDIR,runs(r));
+
     % checks if output already generated
-    %if isfile(compose("%s/%s%s",FUNCDIR,PREFIX,runs(r)))
-	%    fprintf('Skipping: file %s already computed.\n',runs(r))
-	%    continue;
-    %end
+    if isfile(anatout)
+	   fprintf('Skipping: file %s already computed.\n',runs(r))
+	   continue;
+    end
 
     % else >> adds to batch
     n_runs = n_runs + 1;
     run = compose("%s/%s%s",FUNCDIR,INFIX,runs(r));
-    crun = compose("%s/%s%s",FUNCDIR,PREFIX,runs(r));
-    system(compose("cp -v %s %s",run,crun))
-
     meanfile = compose("%s/mean-%s",FUNCDIR,runs(r));
-    cmean = compose("%s/%smean-%s",FUNCDIR,PREFIX,runs(r));
-    system(compose("cp -v %s %s",meanfile,cmean))
+    system(compose("cp -v %s %s",anatfile,anatout)); % makes a copy of anat file
 
-    % fixed image [anat image]
-    matlabbatch{r}.spm.spatial.coreg.estimate.ref = cellstr(anatfile);
-    % moved image [mean image]
-    matlabbatch{r}.spm.spatial.coreg.estimate.source = cellstr(cmean);
+    % fixed image [mean image]
+    matlabbatch{r}.spm.spatial.coreg.estimate.ref = cellstr(meanfile);
+    % moved image [anat image]
+    matlabbatch{r}.spm.spatial.coreg.estimate.source = cellstr(anatout);
     % other images [func scan as expanded img]
-    matlabbatch{r}.spm.spatial.coreg.estimate.other = cellstr(spm_select('expand', crun));
+    matlabbatch{r}.spm.spatial.coreg.estimate.other = cellstr(spm_select('expand', run));
     
     matlabbatch{r}.spm.spatial.coreg.estimate.eoptions.cost_fun = 'ncc';
     matlabbatch{r}.spm.spatial.coreg.estimate.eoptions.sep = [4 2];
@@ -56,6 +54,6 @@ end
 
 fprintf("COREGISTRATION COMPLETED for %s\n", runtype)
 
-out = 1;
+out = 0;
 
 end

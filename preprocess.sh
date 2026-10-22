@@ -28,7 +28,8 @@ echo -e "Processing sub $sub\n"
 
 export SUBBIDS="${BIDSDIR}/sub-${sub}"
 export PROCDIR="${DATADIR}/processed/sub-${sub}"
-mkdir -p $PROCDIR
+export ANATDIR="${PROCIDR}/anat"
+mkdir -p $PROCDIR $ANATDIR
 
 # loads required modules
 module load matlab
@@ -179,14 +180,17 @@ echo "-------------------------------------------"
 echo -e "\nApplying anat2func coregistration for $sub\n"
 echo "-------------------------------------------"
 
-PREFIX_COREG="creg-"
+PREFIX_COREG=$PREFIX_MOCO
+
+# creating link to anat file
+ln -s "${SUBBIDS}/anat/sub-${sub}_acq-mp2rage_UNIT1.nii" "${ANATDIR}/sub-${sub}_acq-mp2rage_UNIT1.nii"
 
 matlab -batch " \
 	addpath('${CODEDIR}'); \
 	addpath(genpath('${APPDIR}')); \
 	[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); \
-	PROC_coregistration(bold,'bold',anat,'${PROCDIR}','${SUBBIDS}/anat','${PREFIX_MOCO}','${PREFIX_COREG}'); \
-	PROC_coregistration(vaso,'vaso',anat,'${PROCDIR}','${SUBBIDS}/anat','${PREFIX_MOCO}','${PREFIX_COREG}'); \
+	PROC_coregistration(bold,'bold',anat,'${PROCDIR}','${ANATDIR}','${PREFIX_MOCO}'); \
+	PROC_coregistration(vaso,'vaso',anat,'${PROCDIR}','${ANATDIR}','${PREFIX_MOCO}'); \
 	exit \
 "
 
@@ -207,9 +211,9 @@ matlab -batch " \
 "
 
 # moving outputs to processing folder
-mv -v ${SUBBIDS}/anat/c?sub*nii "${PROCDIR}"
-mv -v ${SUBBIDS}/anat/y_*nii "${PROCDIR}"
-mv -v ${SUBBIDS}/anat/msub*nii "${PROCDIR}"
+mv -v ${PROCDIR}/anat/c?anat*nii "${ANATDIR}"
+mv -v ${PROCDIR}/anat/y_*nii "${ANATDIR}"
+mv -v ${PROCDIR}/anat/manat*nii "${ANATDIR}"
 
 # 8) NORMALIZATION
 
