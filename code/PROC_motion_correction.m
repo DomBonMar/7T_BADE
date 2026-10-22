@@ -69,7 +69,7 @@ for r = 1:length(runs)
 
     fprintf("Realigning %s run %s as %s\n",runtype,run,target)
     for n = 1:numel(V)
-        fprintf("Alignment for volume %d is:\n",n)
+        %fprintf("Alignment for volume %d is:\n",n)
         spm_get_space(sprintf('%s,%d',run,n), M);
     end
 

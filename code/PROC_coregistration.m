@@ -27,6 +27,9 @@ for r = 1:length(runs)
     % else >> adds to batch
     n_runs = n_runs + 1;
     run = compose("%s/%s%s",FUNCDIR,INFIX,runs(r));
+    crun = compose("%s/%s%s",FUNCDIR,PREFIX,runs(r));
+    system(compose("cp -v %s %s",run,crun))
+
     meanfile = compose("%s/mean-%s",FUNCDIR,runs(r));
 
     % fixed image [anat image]
@@ -34,7 +37,7 @@ for r = 1:length(runs)
     % moved image [mean image]
     matlabbatch{r}.spm.spatial.coreg.estimate.source = cellstr(meanfile);
     % other images [func scan as expanded img]
-    matlabbatch{r}.spm.spatial.coreg.estimate.other = cellstr(spm_select('expand', run));
+    matlabbatch{r}.spm.spatial.coreg.estimate.other = cellstr(spm_select('expand', crun));
     
     matlabbatch{r}.spm.spatial.coreg.estimate.eoptions.cost_fun = 'ncc';
     matlabbatch{r}.spm.spatial.coreg.estimate.eoptions.sep = [4 2];
