@@ -64,13 +64,17 @@ for r = 1:length(runs)
     
     % moco correction algnment
     fprintf("MOCO alignment pre-adjustment is:\n")
+    spm_get_space(run)
     V = spm_vol(run)
 
     fprintf("Realigning %s run %s as %s\n",runtype,run,target)
     for n = 1:numel(V)
         fprintf("Alignment for volume %d is:\n",n)
-        spm_get_space(sprintf('%s,%d',run,n), M)
+        spm_get_space(sprintf('%s,%d',run,n), M);
     end
+
+    fprintf("MOCO alignment after adjustment is:\n")
+    spm_get_space(run)
 end
 
 out = 0;
