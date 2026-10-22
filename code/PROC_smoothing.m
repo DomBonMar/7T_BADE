@@ -4,7 +4,7 @@ function out = PROC_smoothing(runs,runtype,FUNCDIR,INFIX,PREFIX)
 % FUNCDIR >> folder with functional scans
 
 out = 1;
-n_runs = 0;
+n = 0;
 fprintf("Running smoothing on %s runs\n",runtype)
 
 % list of func (wr files)
@@ -18,7 +18,7 @@ for r = 1:length(runs)
     end
 
     % else >> adds to batch
-    n_runs = n_runs + 1;
+    n = n + 1;
     run = compose("%s/%s%s",FUNCDIR,INFIX,runs(r));
     run_array = [run_array, run];
 
@@ -33,7 +33,7 @@ matlabbatch{1}.spm.spatial.smooth.dtype = 0;
 matlabbatch{1}.spm.spatial.smooth.im = 0;
 matlabbatch{1}.spm.spatial.smooth.prefix = PREFIX;
 
-if n_runs ~= 0
+if n ~= 0
     spm_jobman('run',matlabbatch) % execute the batch
     clear matlabbatch % clear matlabbatch
 end
