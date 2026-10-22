@@ -57,6 +57,7 @@ for r = 1:length(runs)
 
     % nordic alignment
     run = sprintf('%s/%s%s',INDIR,PREFIX,runs(r));
+    meanimg = compose("%s/mean-%s",INDIR,runs(r));
     target = sprintf('%s/%s%s',INDIR,INFIX,runs(r));
 
     fprintf("Target aligned from NORDIC is:\n")
@@ -66,6 +67,8 @@ for r = 1:length(runs)
     fprintf("MOCO alignment pre-adjustment is:\n")
     spm_get_space(run)
     V = spm_vol(run)
+
+    spm_get_space(sprintf('%s,%d',meanimg,n), M);
 
     fprintf("Realigning %s run %s as %s\n",runtype,run,target)
     for n = 1:numel(V)
