@@ -31,11 +31,13 @@ for r = 1:length(runs)
     system(compose("cp -v %s %s",run,crun))
 
     meanfile = compose("%s/mean-%s",FUNCDIR,runs(r));
+    cmean = compose("%s/%smean-%s",FUNCDIR,PREFIX,runs(r));
+    system(compose("cp -v %s %s",meanfile,cmean))
 
     % fixed image [anat image]
     matlabbatch{r}.spm.spatial.coreg.estimate.ref = cellstr(anatfile);
     % moved image [mean image]
-    matlabbatch{r}.spm.spatial.coreg.estimate.source = cellstr(meanfile);
+    matlabbatch{r}.spm.spatial.coreg.estimate.source = cellstr(cmean);
     % other images [func scan as expanded img]
     matlabbatch{r}.spm.spatial.coreg.estimate.other = cellstr(spm_select('expand', crun));
     
