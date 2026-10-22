@@ -4,6 +4,7 @@ function out = PROC_segmentation(runs,runtype,ANATDIR,SPMDIR)
 % ANATDIR >> folder with anatomical scans
 
 out = 1;
+n_runs = 0;
 
 for r = 1:length(runs)
 

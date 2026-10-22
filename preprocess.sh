@@ -28,7 +28,7 @@ echo -e "Processing sub $sub\n"
 
 export SUBBIDS="${BIDSDIR}/sub-${sub}"
 export PROCDIR="${DATADIR}/processed/sub-${sub}"
-export ANATDIR="${PROCIDR}/anat"
+export ANATDIR="${PROCDIR}/anat"
 mkdir -p $PROCDIR $ANATDIR
 
 # loads required modules
@@ -227,8 +227,8 @@ matlab -batch " \
 	addpath('${CODEDIR}'); \
 	addpath(genpath('${APPDIR}')); \
 	[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); \
-	PROC_normalization(bold,'bold',anat,'${PROCDIR}','${PROCDIR}','${PREFIX_COREG}','${PREFIX_NORM}'); \
-	PROC_normalization(vaso,'vaso',anat,'${PROCDIR}','${PROCDIR}','${PREFIX_COREG}','${PREFIX_NORM}'); \
+	PROC_normalization(bold,'bold','${ANATDIR}','${PROCDIR}','${PREFIX_COREG}','${PREFIX_NORM}'); \
+	PROC_normalization(vaso,'vaso','${ANATDIR}','${PROCDIR}','${PREFIX_COREG}','${PREFIX_NORM}'); \
 	exit \
 "
 
