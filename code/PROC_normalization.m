@@ -12,13 +12,14 @@ N_RUNS = length(runs);
 
 for r = 1:2*N_RUNS
 
+    ind = mod(r,N_RUNS);
     % normalizes the functional runs and the anat templates per run
     if r <= N_RUNS
         outfile = compose("%s/%s%s",FUNCDIR,PREFIX,runs(r));
         infile = compose("%s/%s%s",FUNCDIR,INFIX,runs(r));
     else
-        outfile = compose("%s/%smanat-%s",ANATDIR,PREFIX,runs(r));
-        infile = compose("%s/manat-%s",ANATDIR,runs(r));
+        outfile = compose("%s/%smanat-%s",ANATDIR,PREFIX,runs(ind));
+        infile = compose("%s/manat-%s",ANATDIR,runs(ind));
     end
 
     % checks if output already generated
@@ -29,7 +30,7 @@ for r = 1:2*N_RUNS
 
     % else >> adds to batch
     n_runs = n_runs + 1;
-    warpfile = compose("%s/y_anat-%s",ANATDIR,runs(r));
+    warpfile = compose("%s/y_anat-%s",ANATDIR,runs(ind));
 
     % deformation field (y_ file)
     matlabbatch{r}.spm.spatial.normalise.write.subj.def = cellstr(warpfile);

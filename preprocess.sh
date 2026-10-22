@@ -206,14 +206,15 @@ matlab -batch " \
 	addpath('${CODEDIR}'); \
 	addpath(genpath('${APPDIR}')); \
 	[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); \
-	PROC_segmentation(anat,'${SUBBIDS}/anat','${APPDIR}/spm','${PROCDIR}'); \
+	PROC_segmentation(bold,'bold','${ANATDIR}','${APPDIR}/spm'); \
+	PROC_segmentation(vaso,'vaso','${ANATDIR}','${APPDIR}/spm'); \
 	exit \
 "
 
 # moving outputs to processing folder
-mv -v ${PROCDIR}/anat/c?anat*nii "${ANATDIR}"
-mv -v ${PROCDIR}/anat/y_*nii "${ANATDIR}"
-mv -v ${PROCDIR}/anat/manat*nii "${ANATDIR}"
+mv -v ${PROCDIR}/c?anat*nii "${ANATDIR}"
+mv -v ${PROCDIR}/y_*nii "${ANATDIR}"
+mv -v ${PROCDIR}/manat*nii "${ANATDIR}"
 
 # 8) NORMALIZATION
 
