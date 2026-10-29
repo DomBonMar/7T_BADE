@@ -34,6 +34,8 @@ for r = 1:length(runs)
     system(compose("cp -v %s %s",input_run,output_run));
 
     meanfile = compose("%s/mean-%s",FUNCDIR,runs(r));
+    meanout = compose("%s/%smean-%s",FUNCDIR,PREFIX,runs(r));
+    system(compose("cp -v %s %s",meanfile,meanout)); % makes a copy of anat file
     system(compose("cp -v %s %s",anatfile,anatout)); % makes a copy of anat file
 
     % fixed image [mean image]

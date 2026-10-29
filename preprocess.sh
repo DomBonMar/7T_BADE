@@ -7,6 +7,7 @@
 #SBATCH --mem-per-cpu=10000
 
 BASEDIR=$(pwd)
+RUNTYPES=("bold" "vaso")
 NUM_ANAT=4 # number of anatomical scans
 
 # directory list
