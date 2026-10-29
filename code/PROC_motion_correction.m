@@ -49,6 +49,8 @@ fprintf("MOTION CORRECTION COMPLETED for %s\n", runtype)
 
 % move images
 system(compose("rename '%s%s' '%s' * ",PREFIX,INFIX,PREFIX))
+system(compose("rename 'mean%s' 'mean-' * ",INFIX))
+system(compose("rename 'rp_%s' 'rp_' * ",INFIX))
 
 % REALIGN IMAGES (nordic and moco)
 
