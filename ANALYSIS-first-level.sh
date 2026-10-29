@@ -40,7 +40,7 @@ N_CONTRASTS=$(cat "${contrast_file}" | wc -l)
 export SUBBIDS="${BIDSDIR}/sub-${sub}"
 export PROCDIR="${DATADIR}/processed/sub-${sub}"
 export OUTDIR="${BASEDIR}/output/${ANALYSIS_TYPE}/sub-${sub}"
-mkdir -p "${OUTDIR}" "${OUTDIR}/fla-bold" "${OUTDIR}/fla-vaso"
+mkdir -p "${OUTDIR}" "${OUTDIR}/bold" "${OUTDIR}/vaso"
 
 # loads required modules
 module load matlab
@@ -70,31 +70,21 @@ echo -e "Bold scans are $bold\n"
 
 cd "${OUTDIR}"
 
-if [ -f "${OUTDIR}/fla-bold/SPM.mat"  ]; then
-	echo -e "First-level analysis already processed for bold\n"
-else
-	echo -e "Computing bold first-level analysis...\n"
-	matlab -batch " \
-		addpath('${CODEDIR}'); \
-		addpath(genpath('${APPDIR}')); \
-		[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); \
-		ANALYSIS_first_level('${sub}',bold,'bold','${TR}','${condition_file}','${PROCDIR}','${PREFIX}', '${timing_file}','${OUTDIR}/fla-bold'); \
-		exit \
-	"
-fi
+for runtype in ${RUNTYPES[@]}; do
 
-if [ -f "${OUTDIR}/fla-vaso/SPM.mat"  ]; then
-	echo -e "First-level analysis already processed for vaso\n"
-else
-	echo -e "Computing vaso first-level analysis...\n"
-	matlab -batch " \
-		addpath('${CODEDIR}'); \
-		addpath(genpath('${APPDIR}')); \
-		[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); \
-		ANALYSIS_first_level('${sub}',vaso,'vaso','${TR}','${condition_file}','${PROCDIR}','${PREFIX}', '${timing_file}','${OUTDIR}/fla-vaso'); \
-		exit \
-	"
-fi
+	if [ -f "${OUTDIR}/${runtype}/SPM.mat"  ]; then
+		echo -e "First-level analysis already processed for ${runtype}\n"
+	else
+		echo -e "Computing ${runtype} first-level analysis...\n"
+		matlab -batch " \
+			addpath('${CODEDIR}'); \
+			addpath(genpath('${APPDIR}')); \
+			[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); \
+			ANALYSIS_first_level('${sub}',${runtype},'${runtype}','${TR}','${condition_file}','${PROCDIR}','${PREFIX}', '${timing_file}','${OUTDIR}/${runtype}'); \
+			exit \
+		"
+	fi
+done
 
 # 2) MODEL ESTIMATION
 
@@ -102,13 +92,15 @@ echo "-------------------------------------------"
 echo -e "\nEstimating model for $sub\n"
 echo "-------------------------------------------"
 
-matlab -batch " \
-	addpath('${CODEDIR}'); \
-	addpath(genpath('${APPDIR}')); \
-	ANALYSIS_estimation('bold','${OUTDIR}/fla-bold'); \
-	ANALYSIS_estimation('vaso','${OUTDIR}/fla-vaso'); \
-	exit \
-"
+for runtype in ${RUNTYPES[@]}; do
+
+	matlab -batch " \
+		addpath('${CODEDIR}'); \
+		addpath(genpath('${APPDIR}')); \
+		ANALYSIS_estimation('${runtype}','${OUTDIR}/${runtype}'); \
+		exit \
+	"
+done
 
 # 3) CONTRAST ANALYSIS
 
@@ -116,13 +108,15 @@ echo "-------------------------------------------"
 echo -e "\nExtracting contrasts for $sub\n"
 echo "-------------------------------------------"
 
-matlab -batch " \
-	addpath('${CODEDIR}'); \
-	addpath(genpath('${APPDIR}')); \
-	ANALYSIS_contrast('bold','${contrast_file}','${OUTDIR}/fla-bold'); \
-	ANALYSIS_contrast('vaso','${contrast_file}','${OUTDIR}/fla-vaso'); \
-	exit \
-"
+for runtype in ${RUNTYPES[@]}; do
+
+	matlab -batch " \
+		addpath('${CODEDIR}'); \
+		addpath(genpath('${APPDIR}')); \
+		ANALYSIS_contrast('${runtype}','${contrast_file}','${OUTDIR}/${runtype}'); \
+		exit \
+	"
+done
 
 # 4) UPSAMPLING IMAGES
 

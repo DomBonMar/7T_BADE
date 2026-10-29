@@ -48,37 +48,37 @@ end
 fprintf("MOTION CORRECTION COMPLETED for %s\n", runtype)
 
 % move images
-%system(compose("rename '%s%s' '%s' * ",PREFIX,INFIX,PREFIX))
+system(compose("rename '%s%s' '%s' * ",PREFIX,INFIX,PREFIX))
 
 % REALIGN IMAGES (nordic and moco)
 
-% fprintf("Realigning %s runs...\n",runtype)
-% for r = 1:length(runs)
-% 
-%     % nordic alignment
-%     run = sprintf('%s/%s%s',INDIR,PREFIX,runs(r));
-%     meanimg = sprintf('%s/mean-%s',INDIR,runs(r));
-%     target = sprintf('%s/%s%s',INDIR,INFIX,runs(r));
-% 
-%     fprintf("Target aligned from NORDIC is:\n")
-%     M = spm_get_space(target) % target alignment
-% 
-%     % moco correction algnment
-%     fprintf("MOCO alignment pre-adjustment is:\n")
-%     spm_get_space(run)
-%     V = spm_vol(run)
-% 
-%     spm_get_space(meanimg, M);
-% 
-%     fprintf("Realigning %s run %s as %s\n",runtype,run,target)
-%     for n = 1:numel(V)
-%         %fprintf("Alignment for volume %d is:\n",n)
-%         spm_get_space(sprintf('%s,%d',run,n), M);
-%     end
-% 
-%     fprintf("MOCO alignment after adjustment is:\n")
-%     spm_get_space(run)
-% end
+fprintf("Realigning %s runs...\n",runtype)
+for r = 1:length(runs)
+
+    % nordic alignment
+    run = sprintf('%s/%s%s',INDIR,PREFIX,runs(r));
+    meanimg = sprintf('%s/mean-%s',INDIR,runs(r));
+    target = sprintf('%s/%s%s',INDIR,INFIX,runs(r));
+
+    fprintf("Target aligned from NORDIC is:\n")
+    M = spm_get_space(target) % target alignment
+
+    % moco correction algnment
+    fprintf("MOCO alignment pre-adjustment is:\n")
+    spm_get_space(run)
+    V = spm_vol(run)
+
+    spm_get_space(meanimg, M); % mean img alingment
+
+    fprintf("Realigning %s run %s as %s\n",runtype,run,target)
+    for n = 1:numel(V)
+        %fprintf("Alignment for volume %d is:\n",n)
+        spm_get_space(sprintf('%s,%d',run,n), M);
+    end
+
+    fprintf("MOCO alignment after adjustment is:\n")
+    spm_get_space(run)
+end
 
 out = 0;
 

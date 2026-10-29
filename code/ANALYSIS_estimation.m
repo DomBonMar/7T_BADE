@@ -11,7 +11,7 @@ matlabbatch{1}.spm.stats.fmri_est.method.Classical = 1;
 spm_jobman('run',matlabbatch) % execute the batch
 clear matlabbatch % clear matlabbatch
 
-fprintf("MODEL ESTIMATION COMPLETE FOR %s RUNS\n",upper(runtype))
+fprintf("MODEL ESTIMATION COMPLETE FOR %s TARGET\n",upper(runtype))
 
 out = 0;
 
