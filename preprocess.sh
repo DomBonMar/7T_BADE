@@ -92,18 +92,18 @@ echo "-------------------------------------------"
 echo -e "\nApplying NORDIC denoising to $sub\n"
 echo "-------------------------------------------"
 
-rename '.nii.nii' '.nii' *
-
 PREFIX_NORD="nord-"
 
-matlab -batch " \
-	addpath('${CODEDIR}'); \
-	addpath(genpath('${APPDIR}')); \
-	[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); \
-	PROC_nordic_denoising('0', bold, 'bold', '${SUBBIDS}/func', '${PROCDIR}', '', '${PREFIX_NORD}'); \
-	PROC_nordic_denoising('0', vaso, 'vaso', '${SUBBIDS}/func', '${PROCDIR}', '', '${PREFIX_NORD}'); \
-	exit \
-"
+for runtype in ${RUNTYPES[@]}; do
+
+	matlab -batch " \
+		addpath('${CODEDIR}'); \
+		addpath(genpath('${APPDIR}')); \
+		[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); \
+		PROC_nordic_denoising('0', ${runtype}, '${runtype}', '${SUBBIDS}/func', '${PROCDIR}', '', '${PREFIX_NORD}'); \
+		exit \
+	"
+done
 
 # Renaming files
 rename '.nii.nii' '.nii' *
@@ -117,14 +117,16 @@ echo "-------------------------------------------"
 echo -e "\nApplying motion correction to $sub\n"
 echo "-------------------------------------------"
 
-matlab -batch " \
-	addpath('${CODEDIR}'); \
-	addpath(genpath('${APPDIR}')); \
-	[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); \
-	PROC_motion_correction(bold, 'bold', '${PROCDIR}', '${PROCDIR}', '${PREFIX_NORD}', '${PREFIX_MOCO}'); \
-	PROC_motion_correction(vaso, 'vaso', '${PROCDIR}', '${PROCDIR}', '${PREFIX_NORD}', '${PREFIX_MOCO}'); \
-	exit \
-"
+for runtype in ${RUNTYPES[@]}; do
+
+	matlab -batch " \
+		addpath('${CODEDIR}'); \
+		addpath(genpath('${APPDIR}')); \
+		[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); \
+		PROC_motion_correction(${runtype}, '${runtype}', '${PROCDIR}', '${PROCDIR}', '${PREFIX_NORD}', '${PREFIX_MOCO}'); \
+		exit \
+	"
+done
 
 # Renaming files
 
@@ -162,13 +164,15 @@ echo "-------------------------------------------"
 echo -e "\nChecking motion correction details for $sub\n"
 echo "-------------------------------------------"
 
-matlab -batch " \
-	addpath('${CODEDIR}'); \
-	[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); \
-	PROC_view_moco(bold, 'bold','${PROCDIR}','${PROCDIR}'); \
-	PROC_view_moco(vaso, 'vaso','${PROCDIR}','${PROCDIR}'); \
-	exit \
-"
+for runtype in ${RUNTYPES[@]}; do
+
+	matlab -batch " \
+		addpath('${CODEDIR}'); \
+		[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); \
+		PROC_view_moco(${runtype}, '${runtype}','${PROCDIR}','${PROCDIR}'); \
+		exit \
+	"
+done
 
 echo "************************************"
 echo "COMPLETED PREPROCESSING PHASE 1!"
@@ -180,19 +184,21 @@ echo "-------------------------------------------"
 echo -e "\nApplying anat2func coregistration for $sub\n"
 echo "-------------------------------------------"
 
-PREFIX_COREG=$PREFIX_MOCO
+PREFIX_COREG="creg-"
 
 # creating link to anat file
 ln -s "${SUBBIDS}/anat/sub-${sub}_acq-mp2rage_UNIT1.nii" "${ANATDIR}/sub-${sub}_acq-mp2rage_UNIT1.nii"
 
-matlab -batch " \
-	addpath('${CODEDIR}'); \
-	addpath(genpath('${APPDIR}')); \
-	[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); \
-	PROC_coregistration(bold,'bold',anat,'${PROCDIR}','${ANATDIR}','${PREFIX_MOCO}'); \
-	PROC_coregistration(vaso,'vaso',anat,'${PROCDIR}','${ANATDIR}','${PREFIX_MOCO}'); \
-	exit \
-"
+for runtype in ${RUNTYPES[@]}; do
+
+	matlab -batch " \
+		addpath('${CODEDIR}'); \
+		addpath(genpath('${APPDIR}')); \
+		[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); \
+		PROC_coregistration(${runtype},'${runtype}',anat,'${PROCDIR}','${ANATDIR}','${PREFIX_MOCO}','${PREFIX_COREG}'); \
+		exit \
+	"
+done
 
 rename "${PREFIX_COREG}${PREFIX_MOCO}" "${PREFIX_COREG}" *
 
@@ -202,14 +208,16 @@ echo "-------------------------------------------"
 echo -e "\nApplying segmentation for $sub\n"
 echo "-------------------------------------------"
 
-matlab -batch " \
-	addpath('${CODEDIR}'); \
-	addpath(genpath('${APPDIR}')); \
-	[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); \
-	PROC_segmentation(bold,'bold','${ANATDIR}','${APPDIR}/spm'); \
-	PROC_segmentation(vaso,'vaso','${ANATDIR}','${APPDIR}/spm'); \
-	exit \
-"
+for runtype in ${RUNTYPES[@]}; do
+
+	matlab -batch " \
+		addpath('${CODEDIR}'); \
+		addpath(genpath('${APPDIR}')); \
+		[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); \
+		PROC_segmentation(${runtype},'${runtype}','${ANATDIR}','${APPDIR}/spm'); \
+		exit \
+	"
+done
 
 # moving outputs to processing folder
 mv -v ${PROCDIR}/c?anat*nii "${ANATDIR}"
@@ -224,14 +232,16 @@ echo "-------------------------------------------"
 
 PREFIX_NORM="normal-"
 
-matlab -batch " \
-	addpath('${CODEDIR}'); \
-	addpath(genpath('${APPDIR}')); \
-	[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); \
-	PROC_normalization(bold,'bold','${ANATDIR}','${PROCDIR}','${PREFIX_COREG}','${PREFIX_NORM}'); \
-	PROC_normalization(vaso,'vaso','${ANATDIR}','${PROCDIR}','${PREFIX_COREG}','${PREFIX_NORM}'); \
-	exit \
-"
+for runtype in ${RUNTYPES[@]}; do
+
+	matlab -batch " \
+		addpath('${CODEDIR}'); \
+		addpath(genpath('${APPDIR}')); \
+		[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); \
+		PROC_normalization(${runtype},'${runtype}','${ANATDIR}','${PROCDIR}','${PREFIX_COREG}','${PREFIX_NORM}'); \
+		exit \
+	"
+done
 
 rename "${PREFIX_NORM}${PREFIX_COREG}" "${PREFIX_NORM}" *
 
@@ -243,14 +253,16 @@ echo "-------------------------------------------"
 
 PREFIX_SMOOTH="PROC-"
 
-matlab -batch " \
-	addpath('${CODEDIR}'); \
-	addpath(genpath('${APPDIR}')); \
-	[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); \
-	PROC_smoothing(bold,'bold','${PROCDIR}','${PREFIX_NORM}','${PREFIX_SMOOTH}'); \
-	PROC_smoothing(vaso,'vaso','${PROCDIR}','${PREFIX_NORM}','${PREFIX_SMOOTH}'); \
-	exit \
-"
+for runtype in ${RUNTYPES[@]}; do
+
+	matlab -batch " \
+		addpath('${CODEDIR}'); \
+		addpath(genpath('${APPDIR}')); \
+		[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); \
+		PROC_smoothing(${runtype},'${runtype}','${PROCDIR}','${PREFIX_NORM}','${PREFIX_SMOOTH}'); \
+		exit \
+	"
+done
 
 rename "${PREFIX_SMOOTH}${PREFIX_NORM}" "${PREFIX_SMOOTH}" *
 

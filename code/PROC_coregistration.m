@@ -1,4 +1,4 @@
-function out = PROC_coregistration(runs,runtype,anat_img,FUNCDIR,ANATDIR,INFIX)
+function out = PROC_coregistration(runs,runtype,anat_img,FUNCDIR,ANATDIR,INFIX,PREFIX)
 
 % generates coregistration batch using SPM
 
@@ -28,7 +28,11 @@ for r = 1:length(runs)
 
     % else >> adds to batch
     n = n + 1;
-    run = compose("%s/%s%s",FUNCDIR,INFIX,runs(r));
+    input_run = compose("%s/%s%s",FUNCDIR,INFIX,runs(r));
+    output_run = compose("%s/%s%s",FUNCDIR,PREFIX,runs(r));
+    % temporary >> for debugging: create copy of output
+    system(compose("cp -v %s %s",input_run,output_run));
+
     meanfile = compose("%s/mean-%s",FUNCDIR,runs(r));
     system(compose("cp -v %s %s",anatfile,anatout)); % makes a copy of anat file
 
@@ -37,7 +41,7 @@ for r = 1:length(runs)
     % moved image [anat image]
     matlabbatch{n}.spm.spatial.coreg.estimate.source = cellstr(anatout);
     % other images [func scan as expanded img]
-    matlabbatch{n}.spm.spatial.coreg.estimate.other = cellstr(spm_select('expand', run));
+    matlabbatch{n}.spm.spatial.coreg.estimate.other = cellstr(spm_select('expand', output_run));
     
     matlabbatch{n}.spm.spatial.coreg.estimate.eoptions.cost_fun = 'ncc';
     matlabbatch{n}.spm.spatial.coreg.estimate.eoptions.sep = [4 2];
