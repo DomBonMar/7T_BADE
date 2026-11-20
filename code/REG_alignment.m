@@ -15,7 +15,7 @@ for r = 1:length(runs)
 
     % creates copy of run => might need to skip this entirely
     run = compose("%s/%s%s",FUNCDIR,INFIX,runs(r));
-    outname = compose("%s/%s%s",FUNCDIR,PREFIX,runs(r));
+    outname = sprintf('%s/%s%s',FUNCDIR,PREFIX,runs(r));
     system(sprintf('cp -v %s %s',run,outname)) % make raw copy
 
     % skip target file

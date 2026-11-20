@@ -3,7 +3,7 @@
 #SBATCH --output=logs/%x_%j.out
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=16
-#SBATCH --time=0:20:00
+#SBATCH --time=0:08:00
 #SBATCH --mem-per-cpu=10000
 
 ANALYSIS_TYPE="functional"
@@ -41,7 +41,7 @@ for runtype in ${RUNTYPES[@]}; do
 	matlab -batch " \
 		addpath('${CODEDIR}'); \
 		addpath(genpath('${APPDIR}')); \
-		ANALYSIS_first_level('${runtype}','${contrast_file}','${subject_file}','${INDIR}','${OUTDIR}/${runtype}'); \
+		ANALYSIS_second_level('${runtype}','${contrast_file}','${subject_file}','${INDIR}','${OUTDIR}/${runtype}'); \
 		exit \
 	"
 done

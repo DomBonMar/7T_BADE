@@ -7,6 +7,7 @@
 #SBATCH --mem-per-cpu=10000
 
 BASEDIR=$(pwd)
+RUNTYPES=("bold" "vaso")
 
 # directory list
 export DATADIR="${BASEDIR}/data"
@@ -64,31 +65,38 @@ echo "-------------------------------------------"
 echo -e "\nApplying functional registration for $sub\n"
 echo "-------------------------------------------"
 
-matlab -batch " \
-	addpath('${CODEDIR}'); \
-	addpath(genpath('${APPDIR}')); \
-	[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); \
-	REG_coregistration(bold,'bold','${mean_bold}', '${t1_bold}', '${PROCDIR}', 'moco-', 'reg-'); \
-	REG_coregistration(vaso,'vaso','${mean_vaso}', '${t1_vaso}', '${PROCDIR}', 'moco-', 'reg-'); \
-	exit \
-"
+for runtype in ${RUNTYPES[@]}; do
+
+	t1_img="${PROCDIR}/sub-${sub}_t1-like_${runtype}.nii"
+	mean_img="${PROCDIR}/mean-sub-${sub}_task-bade_run-0${target_run}_${runtype}.nii"
+
+	matlab -batch " \
+		addpath('${CODEDIR}'); \
+		addpath(genpath('${APPDIR}')); \
+		[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); \
+		REG_coregistration(${runtype},'${runtype}','${mean_img}', '${t1_img}', '${PROCDIR}', 'moco-', 'reg-'); \
+		exit \
+	"
+done
 
 echo -e "Renaming registered files\n"
 rename "reg-moco-" "reg-" *
 
 # 3) ALIGNMENT STEP
 
-target_bold="${PROCDIR}/reg-sub-${sub}_task-bade_run-0${target_run}_bold.nii"
-target_vaso="${PROCDIR}/reg-sub-${sub}_task-bade_run-0${target_run}_vaso.nii"
+for runtype in ${RUNTYPES[@]}; do
 
-matlab -batch " \
-	addpath('${CODEDIR}'); \
-	addpath(genpath('${APPDIR}')); \
-	[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); \
-	REG_alignment(bold,'bold', '${target_bold}', '${t1_bold}', '${PROCDIR}', 'reg-', 'REG-'); \
-	REG_alignment(vaso,'vaso', '${target_vaso}', '${t1_vaso}', '${PROCDIR}', 'reg-', 'REG-'); \
-	exit \
-"
+	t1_img="${PROCDIR}/sub-${sub}_t1-like_${runtype}.nii"
+	target="${PROCDIR}/reg-sub-${sub}_task-bade_run-0${target_run}_${runtype}.nii"
+	
+	matlab -batch " \
+		addpath('${CODEDIR}'); \
+		addpath(genpath('${APPDIR}')); \
+		[bold, vaso, anat] = get_images('${sub}', '${SUBBIDS}'); \
+		REG_alignment(${runtype},'${runtype}', '${target}', '${t1_img}', '${PROCDIR}', 'reg-', 'REG-'); \
+		exit \
+	"
+done
 
 echo "************************************"
 echo "COMPLETED REGISTRATION PHASE!"

@@ -45,7 +45,7 @@ for r = 1:length(runs)
     % other images [func scan as expanded img]
     matlabbatch{n}.spm.spatial.coreg.estimate.other = cellstr(spm_select('expand', output_run));
     
-    matlabbatch{n}.spm.spatial.coreg.estimate.eoptions.cost_fun = 'ncc';
+    matlabbatch{n}.spm.spatial.coreg.estimate.eoptions.cost_fun = 'nmi';
     matlabbatch{n}.spm.spatial.coreg.estimate.eoptions.sep = [4 2];
     matlabbatch{n}.spm.spatial.coreg.estimate.eoptions.tol = [0.02 0.02 0.02 0.001 0.001 0.001 0.01 0.01 0.01 0.001 0.001 0.001];
     matlabbatch{n}.spm.spatial.coreg.estimate.eoptions.fwhm = [7 7];

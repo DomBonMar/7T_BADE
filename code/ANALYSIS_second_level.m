@@ -1,4 +1,4 @@
-function out = ANALYSIS_second_level(runtype,contrast_file,sub_file,INDIR,OUTDIR)
+%function out = ANALYSIS_second_level(runtype,contrast_file,sub_file,INDIR,OUTDIR)
 
 out = 1;
 
@@ -10,20 +10,23 @@ N_CONTRASTS = length(LABELS);
 % load subject details as covariates
 SUBJECT_INFO = readcell(sub_file);
 SUBJECTS = SUBJECT_INFO(2:end,1);
-GROUP_INFO = SUBJECT_INFO(2:end,end);
-GROUPS = unique(GROUP_INFO);
-COVARIATES = SUBJECT_INFO(1,2:end-1);
-COVARINFO = cell2mat(SUBJECT_INFO(2:end,2:end-1));
+%GROUP_INFO = SUBJECT_INFO(2:end,end);
+%GROUPS = unique(GROUP_INFO);
+COVARIATES = SUBJECT_INFO(1,2:end);
+COVARINFO = cell2mat(SUBJECT_INFO(2:end,2:end));
 [~,N_COVARS] = size(COVARINFO);
 
-for g = 1:length(GROUPS)
+group = "";
+sub_inds = 1:length(SUBJECTS);
 
-    group = GROUPS{g}; % one analysis per group
-    sub_inds = find(strcmp(GROUP_INFO,group)); % only adds correct group
+%for g = 1:length(GROUPS)
+
+%    group = GROUPS{g}; % one analysis per group
+%    sub_inds = find(strcmp(GROUP_INFO,group)); % only adds correct group
 
     for c = 1:N_CONTRASTS
     
-        CONDIR = compose("%s/%s#%s",OUTDIR,group,LABELS{c});
+        CONDIR = compose("%s/%s%s",OUTDIR,group,LABELS{c}); % Add # back
         mkdir(CONDIR)
         sub_files = [];
         
@@ -40,7 +43,7 @@ for g = 1:length(GROUPS)
         matlabbatch{c}.spm.stats.factorial_design.des.mreg.scans = cellstr(sub_files);
     
         % adds model covariates
-        for cov = 1:N_COVARS
+        for cov = 1:N_COVARS % REVERT BACK AFTER TESTING
             matlabbatch{c}.spm.stats.factorial_design.des.mreg.mcov(cov).c = COVARINFO(sub_inds,cov);
             matlabbatch{c}.spm.stats.factorial_design.des.mreg.mcov(cov).cname = COVARIATES{cov};
             matlabbatch{c}.spm.stats.factorial_design.des.mreg.mcov(cov).iCC = 1;
@@ -63,10 +66,10 @@ for g = 1:length(GROUPS)
     spm_jobman('run',matlabbatch)
     clear matlabbatch
 
-end
+% end
 
 fprintf("2ND LEVEL ANALYSIS COMPLETE FOR %s RUNS\n",upper(runtype))
 
 out = 0;
 
-end
+%end
