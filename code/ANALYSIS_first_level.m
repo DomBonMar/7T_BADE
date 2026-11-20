@@ -14,6 +14,12 @@ function out = ANALYSIS_first_level(sub,runs,runtype,TR,condition_file,INDIR,INF
 out = 1;
 cd(OUTDIR);
 
+% checks if already run
+if isfile(compose("%s/SPM.mat",OUTDIR))
+    fprintf("SPM file already created for %s runs\n",runtype)
+    return
+end
+
 % converts metadata to matlab types
 CONDITION_INFO = readcell(condition_file);
 CONDITIONS = CONDITION_INFO(:,1);
