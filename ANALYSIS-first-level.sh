@@ -9,9 +9,9 @@
 ANALYSIS_TYPE="functional"
 PREFIX="PROC-"
 RUNTYPES=("bold" "vaso")
-dx=4
+dx=0.25
 dy=1
-dz=4
+dz=0.25
 
 # directory list
 BASEDIR=$(pwd)
@@ -124,7 +124,7 @@ for runtype in ${RUNTYPES[@]}; do
 
 	echo -e "Upsampling images of type ${runtype}\n"
 
-	updir="${OUTDIR}/fla-${runtype}"
+	updir="${OUTDIR}/${runtype}"
 	cd "${updir}"
 	for (( i=1; i<=${N_CONTRASTS}; i++ )); do
 		img="spmT_000${i}.nii"
